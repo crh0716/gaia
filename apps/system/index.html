@@ -719,7 +719,7 @@
       </form>
 
       <form id="updates-download-dialog" data-type="confirm" role="dialog"
-            data-z-index-level="updates-download-dialog" data-nowifi="false" data-edge="false">
+            data-z-index-level="updates-download-dialog" data-nowifi="false" data-edge="false" data-via3g="false">
         <section>
           <h1>
             Updates
@@ -735,8 +735,10 @@
             data-l10n-id="downloadEdgeWarning">
           Wi-Fi unavailable. Updating over current connection will block incoming calls, and may incur additional charges.
         </p>
-        <p id="updates-offline-warning"
-            data-l10n-id="downloadOfflineWarning">
+        <p id="updates-3g-warning" data-l10n-id="download3gWarning">
+          Updates are downloaded via data connection when Wi-Fi is not available. Additional data charges may apply.    
+        </p>
+        <p id="updates-offline-warning" data-l10n-id="downloadOfflineWarning">
           Connection unavailable. Connect to a network to download updates.
         </p>
         <menu>
@@ -745,6 +747,21 @@
           <button id="updates-download-button" type="submit"
             data-l10n-id="download">Download</button>
         </menu>
+      </form>
+
+      <form id="updates-via3g-dialog" data-type="confirm" role="dialog" data-z-index-level="updates-via3g-dialog">
+        <section>
+          <h1 data-l10n-id="downloadUpdatesVia3G">
+            Download updates via 3G?
+          </h1>
+          <p data-l10n-id="downloadUpdatesVia3GMessage">
+            Updates are downloaded via data connection when Wi-Fi is not available. Additional data charges may apply.
+          </p>
+        </section>
+        <menu>
+            <button id="updates-via3g-notnow-button" type="reset" data-l10n-id="notNow">Not Now</button>
+            <button id="updates-via3g-download-button" type="submit" data-l10n-id="download">Download</button>
+          </menu>
       </form>
 
       <div id="lockscreen-camera" data-z-index-level="lockscreen-camera"></div>
