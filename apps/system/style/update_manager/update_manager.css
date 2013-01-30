@@ -114,20 +114,20 @@ html, body {
   -moz-transform: translateY(0);
 }
 
-#updates-via3g-dialog,
+#updates-viaDataConnection-dialog,
 #updates-download-dialog {
   padding-bottom: 4.9rem;
   padding-top: 0;
   display: none;
 }
 
-#updates-via3g-dialog.visible,
+#updates-viaDataConnection-dialog.visible,
 #updates-download-dialog.visible {
   display: inline-block;
   pointer-events: auto;
 }
 
-#updates-via3g-dialog h1,
+#updates-viaDataConnection-dialog h1,
 #updates-download-dialog h1 {
   font-size: 1.9rem;
   color: #fff;
@@ -135,7 +135,7 @@ html, body {
   background: rgba(255, 255, 255, 0.0);
 }
 
-#updates-via3g-dialog h1 {
+#updates-viaDataConnection-dialog h1 {
   padding-left: 2.8rem;
   height: 2.4rem;
   line-height: 2.4rem;
@@ -143,7 +143,7 @@ html, body {
   border: none;
 }
 
-#updates-via3g-dialog section,
+#updates-viaDataConnection-dialog section,
 #updates-download-dialog section {
   height: auto;
   line-height: 3.5rem;
@@ -214,7 +214,6 @@ html, body {
 }
 
 #updates-download-dialog p {
-  display: none;
   position: absolute;
   left: 0;
   right: 0;
@@ -238,17 +237,19 @@ html, body {
   max-height: calc(100% - 15rem - 20px);
 }
 
+#updates-download-dialog #updates-download-button[data-online="false"] {
+  visibility: collapse;
+}
+
 #updates-download-dialog #updates-offline-warning,
 #updates-download-dialog #updates-no-wifi-warning,
-#updates-download-dialog #updates-edge-warning,
-#updates-download-dialog #updates-3g-warning,
+#updates-download-dialog #updates-data-connection-warning,
 #updates-download-dialog[data-online="false"] #updates-download-button {
-  display: none;
+  visibility: collapse;
 }
 
 #updates-download-dialog[data-online="false"] #updates-offline-warning,
-#updates-download-dialog[data-online="true"][data-nowifi="true"][data-edge="true"] #updates-edge-warning,
-#updates-download-dialog[data-online="true"][data-nowifi="true"][data-via3g="true"] #updates-3g-warning,
-#updates-download-dialog[data-online="true"][data-nowifi="true"][data-edge="false"][data-via3g="false"] #updates-no-wifi-warning {
-  display: block;
+#updates-download-dialog[data-online="true"][data-nowifi="true"][data-dataConnectionInlineWarning="false"] #updates-no-wifi-warning,
+#updates-download-dialog[data-online="true"][data-nowifi="true"][data-dataConnection="true"][data-dataConnectionInlineWarning="true"] #updates-data-connection-warning {
+  visibility: visible;
 }

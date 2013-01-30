@@ -19,11 +19,11 @@ var UpdateManager = {
   _errorTimeout: null,
   _wifiLock: null,
   _systemUpdateDisplayed: false,
-  _is3GUpdateWarningEnabled: true,
+  _isDataConnectionWarningDialogEnabled: true,
   _settings: null,
   _conn: null,
   _edgeTypes: ['edge', 'is95a', 'is95b', 'gprs'],
-  _3gTypes: ['evdo0', 'evdoa', 'evdob', '1xrtt', 'umts'],
+  _3gTypes: ['evdo0', 'evdoa', 'evdob', '1xrtt', 'umts', 'hspa', 'hsdpa'],
   NOTIFICATION_BUFFERING_TIMEOUT: 30 * 1000,
   TOASTER_TIMEOUT: 1200,
 
@@ -34,9 +34,9 @@ var UpdateManager = {
   laterButton: null,
   notnowButton: null,
   downloadButton: null,
-  downloadVia3GButton: null,
+  downloadViaDataConnectionButton: null,
   downloadDialog: null,
-  downloadVia3GDialog: null,
+  downloadViaDataConnectionDialog: null,
   downloadDialogTitle: null,
   downloadDialogList: null,
 
@@ -68,21 +68,25 @@ var UpdateManager = {
     this.toasterMessage = this.toaster.querySelector('.message');
 
     this.laterButton = document.getElementById('updates-later-button');
-    this.notnowButton = document.getElementById('updates-via3g-notnow-button');
+    this.notnowButton =
+      document.getElementById('updates-viaDataConnection-notnow-button');
     this.downloadButton = document.getElementById('updates-download-button');
-    this.downloadVia3GButton =
-      document.getElementById('updates-via3g-download-button');
+    this.downloadViaDataConnectionButton =
+      document.getElementById('updates-viaDataConnection-download-button');
     this.downloadDialog = document.getElementById('updates-download-dialog');
     this.downloadDialogTitle = this.downloadDialog.querySelector('h1');
     this.downloadDialogList = this.downloadDialog.querySelector('ul');
-    this.downloadVia3GDialog = document.getElementById('updates-via3g-dialog');
+    this.downloadViaDataConnectionDialog =
+      document.getElementById('updates-viaDataConnection-dialog');
 
     this.container.onclick = this.containerClicked.bind(this);
     this.laterButton.onclick = this.cancelPrompt.bind(this);
     this.downloadButton.onclick = this.requestDownloads.bind(this);
     this.downloadDialogList.onchange = this.updateDownloadButton.bind(this);
-    this.notnowButton.onclick = this.cancel3GUpdatesPrompt.bind(this);
-    this.downloadVia3GButton.onclick = this.requestDownloads.bind(this);
+    this.notnowButton.onclick =
+      this.cancelDataConnectionUpdatesPrompt.bind(this);
+    this.downloadViaDataConnectionButton.onclick =
+      this.requestDownloads.bind(this);
 
     window.addEventListener('mozChromeEvent', this);
     window.addEventListener('applicationinstall', this);
@@ -105,25 +109,33 @@ var UpdateManager = {
       this.updateDataStatus();
     }
 
-    window.asyncStorage.getItem('gaia.system.is3GUpdateWarningEnabled',
+    window.asyncStorage.
+      getItem('gaia.system.isDataConnectionWarningDialogEnabled',
       (function(value) {
         value = value || true;
-        this._is3GUpdateWarningEnabled = value;
+        this._isDataConnectionWarningDialogEnabled = true;
+        //this.downloadDialog.dataset.dataConnectionInlineWarning = !value;
+        //dump("=== data connection inline warning: " + this.downloadDialog.dataset.dataConnectionInlineWarning);
     }).bind(this));
+
+      this.downloadDialog.dataset.dataConnectionInlineWarning = true;
   },
 
   requestDownloads: function um_requestDownloads(evt) {
     evt.preventDefault();
 
-    if (evt.target == this.downloadVia3GButton) {
-      window.asyncStorage.setItem('gaia.system.is3GUpdateWarningEnabled',
-        false);
-      this._is3GUpdateWarningEnabled = false;
+    if (evt.target == this.downloadViaDataConnectionButton) {
+      window.asyncStorage.
+        setItem('gaia.system.isDataConnectionWarningDialogEnabled', false);
+      this._isDataConnectionWarningDialogEnabled = false;
+      this.downloadDialog.dataset.dataConnectionInlineWarning = true;
+      dump("=== data connection inline warning: " + this.downloadDialog.dataset.dataConnectionInlineWarning);
       this.startDownloads();
     }
     else {
-      if (this._is3GUpdateWarningEnabled && this.downloadDialog.dataset.via3g) {
-        this.downloadVia3GDialog.classList.add('visible');
+      if (this._isDataConnectionWarningDialogEnabled &&
+          this.downloadDialog.dataset.dataConnection) {
+        this.downloadViaDataConnectionDialog.classList.add('visible');
       }
       else {
         this.startDownloads();
@@ -133,7 +145,7 @@ var UpdateManager = {
 
   startDownloads: function um_startDownloads() {
     this.downloadDialog.classList.remove('visible');
-    this.downloadVia3GDialog.classList.remove('visible');
+    this.downloadViaDataConnectionDialog.classList.remove('visible');
 
     UtilityTray.show();
 
@@ -295,9 +307,10 @@ var UpdateManager = {
     this.downloadDialog.classList.remove('visible');
   },
 
-  cancel3GUpdatesPrompt: function um_cancel3GUpdatesPrompt() {
+  cancelDataConnectionUpdatesPrompt: function um_cancelDCUpdatesPrompt() {
     CustomDialog.hide();
-    this.downloadVia3GDialog.classList.remove('visible');
+    this.downloadViaDataConnectionDialog.classList.remove('visible');
+    this.downloadDialog.classList.remove('visible');
   },
 
   downloadProgressed: function um_downloadProgress(bytes) {
@@ -545,6 +558,7 @@ var UpdateManager = {
   updateOnlineStatus: function su_updateOnlineStatus() {
     var online = (navigator && 'onLine' in navigator) ? navigator.onLine : true;
     this.downloadDialog.dataset.online = online;
+    dump("=== data online: " + this.downloadDialog.dataset.online);
 
     if (online) {
       this.laterButton.classList.remove('full');
@@ -559,8 +573,9 @@ var UpdateManager = {
 
     var data = this._conn.data;
     var dataset = this.downloadDialog.dataset;
-    dataset.edge = (this._edgeTypes.indexOf(data.type) !== -1);
-    dataset.via3g = (this._3gTypes.indexOf(data.type) !== -1);
+    dataset.dataConnection = (this._edgeTypes.indexOf(data.type) !== -1) ||
+      (this._3gTypes.indexOf(data.type) !== -1);
+    dump("=== data connection: " + dataset.dataConnection + " type: " + data.type);
   },
 
   updateWifiStatus: function su_updateWifiStatus() {
@@ -570,6 +585,7 @@ var UpdateManager = {
 
     this.downloadDialog.dataset.nowifi =
       (wifiManager.connection.status != 'connected');
+    dump("=== no wifi: " + this.downloadDialog.dataset.nowifi + " status: " + wifiManager.connection.status);
   },
 
   checkForUpdates: function su_checkForUpdates(shouldCheck) {
