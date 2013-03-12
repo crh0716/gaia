@@ -92,9 +92,7 @@ var Contacts = (function() {
       case 'add-parameters':
         initForm(function onInitForm() {
           navigation.home();
-          if ('tel' in params) {
-            selectList(params['tel']);
-          }
+          selectList(params);
         });
         return;
     }
@@ -304,19 +302,30 @@ var Contacts = (function() {
     contactsList.handleClick(contactListClickHandler);
   };
 
-  var selectList = function selectList(phoneNumber) {
+  var selectList = function selectList(params) {
     var addButton = document.getElementById('add-contact-button');
     addButton.classList.add('hide');
     contactsList.clearClickHandlers();
     contactsList.handleClick(function addToContactHandler(id) {
-      var data = {
-        'tel': [{
-            'value': phoneNumber,
-            'carrier': null,
-            'type': TAG_OPTIONS['phone-type'][0].value
-          }
-        ]
-      };
+      var data = {};
+      for (var attr in params) {
+        switch (attr) {
+          case 'tel':
+            data['tel'] = [{
+              'value': params[attr],
+              'carrier': null,
+              'type': TAG_OPTIONS['phone-type'][0].value
+            }];
+            break;
+          case 'email':
+            data['email'] = [{
+              'value': params[attr]
+            }];
+            break;
+          default:
+            break;
+        }
+      }
       window.location.hash = '#view-contact-form?extras=' +
         encodeURIComponent(JSON.stringify(data)) + '&id=' + id;
       contactsList.clearClickHandlers();
@@ -476,14 +485,19 @@ var Contacts = (function() {
   };
 
   var handleDetailsBack = function handleDetailsBack() {
-    var hasParams = window.location.hash.split('?');
-    var params = hasParams.length > 1 ?
-      extractParams(hasParams[1]) : -1;
+    if (ActivityHandler.currentlyHandling) {
+      ActivityHandler.postCancel();
+      navigation.home();
+    } else {
+      var hasParams = window.location.hash.split('?');
+      var params = hasParams.length > 1 ?
+        extractParams(hasParams[1]) : -1;
 
-    navigation.back();
-    // post message to parent page included Contacts app.
-    if (params['back_to_previous_tab'] === '1') {
-      window.parent.postMessage({ 'type': 'contactsiframe', 'message': 'back' }, '*');
+      navigation.back();
+      // post message to parent page included Contacts app.
+      if (params['back_to_previous_tab'] === '1') {
+        window.parent.postMessage({ 'type': 'contactsiframe', 'message': 'back' }, '*');
+      }
     }
   };
 
