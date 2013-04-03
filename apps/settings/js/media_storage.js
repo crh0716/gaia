@@ -12,244 +12,138 @@
  * off UMS, and we put some text to that effect on the settings screen.
  */
 
-var MediaStorage = {
-  init: function mediaStorage_init() {
-    this.deviceStorage = navigator.getDeviceStorage('pictures');
-    this.documentStorageListener = false;
-    this.updateListeners();
+var StackedBarViewModel = function(mediaStorageViewModel) {
+  var _mediaStorageViewModel = mediaStorageViewModel;
+  var _properties = {
+    musicPercentage: new DP('0'),
+    picturePercentage: new DP('0'),
+    videoPercentage: new DP('0'),
+    freePercentage: new DP('0')
+  };
+  var bindingMap = {
+    'musicSize': _properties.musicPercentage,
+    'pictureSize': _properties.picturePercentage,
+    'videoSize': _properties.videoPercentage,
+    'freeSize': _properties.freePercentage
+  };
 
-    window.addEventListener('localized', this);
-
-    // Use mozvisibilitychange so that we don't get notified of device
-    // storage notifications when the settings app isn't visible.
-    document.addEventListener('mozvisibilitychange', this);
-  },
-
-  initUI: function mediaStorage_initUI() {
-    this.umsEnabledCheckBox = document.querySelector('[name="ums.enabled"]');
-    this.umsEnabledInfoBlock = document.getElementById('ums-desc');
-    if (!this.umsEnabledCheckBox || !this.umsEnabledInfoBlock)
-      return;
-
-    // The normal handling of the checkboxes in the settings is done through a
-    // 'change' event listener in settings.js
-    this.umsEnabledCheckBox.onchange = function umsEnabledChanged() {
-      MediaStorage.updateInfo();
-    };
-    stackedBar.init('space-stackedbar');
-    this.updateInfo();
-  },
-
-  handleEvent: function mediaStorage_handleEvent(evt) {
-    switch (evt.type) {
-      case 'localized':
-        this.updateInfo();
-        break;
-      case 'change':
-        switch (evt.reason) {
-          case 'available':
-          case 'unavailable':
-          case 'shared':
-            this.updateInfo();
-            break;
-        }
-        break;
-      case 'mozvisibilitychange':
-        this.updateListeners();
-        break;
+  var _refresh = function() {
+    var total = 0;
+    var values = [];
+    for (var prop in bindingMap) {
+      var value = _mediaStorageViewModel.get(prop);
+      total += value;
+      values.push(value);
     }
-  },
-
-  updateListeners: function mediaStorage_updateListeners() {
-    if (document.mozHidden) {
-      // Settings is being hidden. Unregister our change listener so we won't
-      // get notifications whenever files are added in another app.
-      if (this.documentStorageListener) {
-        this.deviceStorage.removeEventListener('change', this);
-        this.documentStorageListener = false;
-      }
-    } else {
-      if (!this.documentStorageListener) {
-        this.deviceStorage.addEventListener('change', this);
-        this.documentStorageListener = true;
-      }
-      this.updateInfo();
+    for (var prop in bindingMap) {
+      var property = bindingMap[prop];
+      var percentage = 100 * values.shift() / total;
+      property.set(percentage + '%');
     }
-  },
+  };
 
-  updateInfo: function mediaStorage_updateInfo() {
-    var self = this;
-
-    var availreq = this.deviceStorage.available();
-    availreq.onsuccess = function mediaStorage_availSuccess(evt) {
-      var _ = navigator.mozL10n.get;
-      var state = evt.target.result;
-
-      var infoBlock = self.umsEnabledInfoBlock;
-      if (infoBlock) {
-         if (self.umsEnabledCheckBox.checked) {
-           infoBlock.textContent = _('enabled');
-         } else if (state === 'shared') {
-           infoBlock.textContent = _('umsUnplugToDisable');
-         } else {
-           infoBlock.textContent = _('disabled');
-         }
-      }
-
-      var mediaSubtitle = document.getElementById('media-storage-desc');
-      switch (state) {
-        case 'shared':
-          mediaSubtitle.textContent = '';
-          mediaSubtitle.dataset.l10nId = '';
-          // Keep the media storage enabled,
-          // so that the user goes inside to toggle USB Mass storage.
-          self.setEnabledState(true);
-          self.setInfoInvalid();
-          break;
-
-        case 'unavailable':
-          mediaSubtitle.textContent = _('no-storage');
-          mediaSubtitle.dataset.l10nId = 'no-storage';
-          self.setEnabledState(false);
-          self.setInfoInvalid();
-          break;
-
-        case 'available':
-          self.setEnabledState(true);
-          self.updateStorageInfo();
-          break;
-      }
-    };
-  },
-
-  setEnabledState: function mediaStorage_setEnabledState(enabled) {
-    var mediaStorageSection = document.getElementById('media-storage-section');
-    if (!mediaStorageSection)
-      return;
-    if (enabled) {
-      mediaStorageSection.classList.remove('disabled');
-    } else {
-      mediaStorageSection.classList.add('disabled');
+  var _vm = {
+    bind: function mediaStorageVM_bind(propertyName, callback) {
+      var property = _properties[propertyName];
+      if (!property)
+        return;
+      property.bind(callback);
+    },
+    unbind: function MediaStorageVM_unbind(propertyName, callback) {
+      var property = _properties[propertyName];
+      if (!property)
+        return;
+      property.unbind(callback);
+    },
+    get: function mediaStorageVM_get(propertyName) {
+      var property = _properties[propertyName];
+      if (!property)
+        return null;
+      else
+        return property.get();
     }
-  },
+  };
 
-  setInfoInvalid: function mediaStorage_setInfoInvalid() {
-    var _ = navigator.mozL10n.get;
-
-    // clear the space info when it is disabled
-    var idList = ['#music-space .size', '#pictures-space .size',
-      '#videos-space .size', '#media-free-space .size'];
-    idList.forEach(function clearSpace(id) {
-      var element = document.querySelector(id);
-      if (element) {
-        element.textContent = _('size-not-available');
-      }
+  // initialization
+  for (var prop in bindingMap) {
+    _mediaStorageViewModel.bind(prop, function() {
+      _refresh();
     });
-  },
+  }
+  _refresh();
 
-  updateStorageInfo: function mediaStorage_updateStorageInfo() {
-    var _ = navigator.mozL10n.get;
-    function formatSize(element, size, l10nId) {
-      if (!element)
-        return;
+  return _vm;
+};
 
-      if (size === undefined || isNaN(size)) {
-        element.textContent = '';
-        return;
+MediaStorage.viewModel(function(viewModel) {
+  (function initStackedBar() {
+    var stackedBarViewModel = new StackedBarViewModel(viewModel);
+    var stackedBar = document.getElementById('space-stackedbar');
+    var bindingProperties = ['music', 'picture', 'video', 'free'];
+    var bindingMap = {};
+
+    bindingProperties.forEach(function(property) {
+      var itemID = 'stackedbar-item-' + property;
+      var item = document.getElementById(itemID);
+
+      if (!item) {
+        item = document.createElement('span');
+        item.className = 'stackedbar-item';
+        item.id = itemID;
+        stackedBar.appendChild(item);
       }
+      bindingMap[property + 'Percentage'] = item;
+    });
 
-      // KB - 3 KB (nearest ones), MB, GB - 1.2 MB (nearest tenth)
-      var fixedDigits = (size < 1024 * 1024) ? 0 : 1;
-      var sizeInfo = FileSizeFormatter.getReadableFileSize(size, fixedDigits);
+    for (var prop in bindingMap) {
+      var element = bindingMap[prop];
+      (function(element) {
+        element.style.width = stackedBarViewModel.get(prop);
+        stackedBarViewModel.bind(prop, function(newValue, oldValue) {
+          element.style.width = newValue;
+        });
+      })(element);
+    }
+  })();
 
-      element.textContent = _(l10nId || 'storageSize', {
-        size: sizeInfo.size,
-        unit: _('byteUnit-' + sizeInfo.unit)
+  (function initTextItems() {
+    var musicDesc = document.querySelector('#music-space .size');
+    var pictureDesc = document.querySelector('#pictures-space .size');
+    var videoDesc = document.querySelector('#videos-space .size');
+    var freeSpaceDesc = document.querySelector('#media-free-space .size');
+
+    var bindingMap = {
+      'musicStatus': musicDesc,
+      'pictureStatus': pictureDesc,
+      'videoStatus': videoDesc,
+      'freeStatus': freeSpaceDesc
+    };
+
+    for (var prop in bindingMap) {
+      var element = bindingMap[prop];
+      (function(element) {
+        element.textContent = viewModel.get(prop);
+        viewModel.bind(prop, function(newValue, oldValue) {
+          element.textContent = newValue;
+        });
+      })(element);
+    }
+  })();
+
+  (function initUMS() {
+    var umsEnabledCheckBox = document.querySelector('[name="ums.enabled"]');
+    var umsEnabledInfoBlock = document.getElementById('ums-desc');
+    if (umsEnabledCheckBox && umsEnabledInfoBlock) {
+      // The normal handling of the checkboxes in the settings is done through a
+      // 'change' event listener in settings.js
+      umsEnabledCheckBox.onchange = function umsEnabledChanged() {
+        viewModel.set('umsEnabled', this.checked);
+      };
+
+      umsEnabledInfoBlock.textContent = viewModel.get('umsStatus');
+      viewModel.bind('umsStatus', function(newValue, oldValue) {
+        umsEnabledInfoBlock.textContent = newValue;
       });
     }
-
-    DeviceStorageHelper.getFreeSpace(function(freeSize) {
-      var element = document.getElementById('media-storage-desc');
-      formatSize(element, freeSize, 'availableSize');
-    });
-
-    // XXX https://bugzilla.mozilla.org/show_bug.cgi?id=844709
-    // if the sub-menu hasn't been loaded because of lazy-loading
-    // we don't need to update these fields
-    var element = document.querySelector('#music-space .size');
-    if (!element)
-      return;
-
-    // Update the storage details
-    stackedBar.reset();
-    DeviceStorageHelper.getStats(['music', 'pictures', 'videos'],
-      function(sizes) {
-        formatSize(element, sizes['music']);
-        stackedBar.add(new StackBarItem('music', sizes['music']));
-
-        element = document.querySelector('#pictures-space .size');
-        formatSize(element, sizes['pictures']);
-        stackedBar.add(new StackBarItem('pictures', sizes['pictures']));
-
-        element = document.querySelector('#videos-space .size');
-        formatSize(element, sizes['videos']);
-        stackedBar.add(new StackBarItem('videos', sizes['videos']));
-
-        element = document.querySelector('#media-free-space .size');
-        formatSize(element, sizes['free']);
-        stackedBar.add(new StackBarItem('free', sizes['free']));
-
-        stackedBar.refreshUI();
-    });
-  }
-};
-
-function StackBarItem(id, value) {
-
-  this.id = id;
-
-  this.value = value;
-
-}
-
-var stackedBar = {
-  _targetId: null,
-  _items: [],
-  _total: 0,
-
-  _initUI: function sb_initui(targetId) {
-    this._targetId = targetId;
-  },
-
-  init: function sb_init(targetId) {
-    this._initUI(targetId);
-  },
-
-  add: function sb_add(item) {
-    this._total = this._total + item.value;
-    this._items.push(item);
-  },
-
-  refreshUI: function sb_refreshUI() {
-    var container = document.getElementById(this._targetId);
-    if (!container)
-      return;
-    for (var i = 0; i < this._items.length; i++) {
-      var item = document.getElementById('stackedbar-item-' +
-          this._items[i].id);
-      if (!item)
-        item = document.createElement('span');
-      item.className = 'stackedbar-item';
-      item.id = 'stackedbar-item-' + this._items[i].id;
-      item.style.width = (this._items[i].value * 100) / this._total + '%';
-      container.appendChild(item);
-    }
-  },
-
-  reset: function sb_reset() {
-    this._items = [];
-    this._total = 0;
-  }
-};
-
-navigator.mozL10n.ready(MediaStorage.init.bind(MediaStorage));
+  })();
+});

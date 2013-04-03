@@ -572,7 +572,7 @@ window.addEventListener('load', function loadSettings() {
       'js/airplane_mode.js',
       'js/battery.js',
       'js/app_storage.js',
-      'js/media_storage.js',
+      'js/core/media_storage.js',
       'shared/js/mobile_operator.js',
       'js/connectivity.js',
       'js/security_privacy.js',
@@ -644,9 +644,6 @@ window.addEventListener('load', function loadSettings() {
           }
         });
         setTimeout(Settings.updateLanguagePanel);
-        break;
-      case 'mediaStorage':        // full media storage status + panel startup
-        MediaStorage.initUI();
         break;
       case 'deviceStorage':       // full device storage status
         AppStorage.update();

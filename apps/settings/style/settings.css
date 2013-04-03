@@ -222,11 +222,11 @@ section li.password > p {
   background-color: #ff7517;
 }
 
-#mediaStorage #space-stackedbar .stackedbar-item#stackedbar-item-pictures, #mediaStorage #pictures-space .stackedbar-color {
+#mediaStorage #space-stackedbar .stackedbar-item#stackedbar-item-picture, #mediaStorage #pictures-space .stackedbar-color {
   background-color: #5da31d;
 }
 
-#mediaStorage #space-stackedbar .stackedbar-item#stackedbar-item-videos, #mediaStorage #videos-space .stackedbar-color {
+#mediaStorage #space-stackedbar .stackedbar-item#stackedbar-item-video, #mediaStorage #videos-space .stackedbar-color {
   background-color: #5917ba;
 }
 
