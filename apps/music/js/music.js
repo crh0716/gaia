@@ -18,6 +18,10 @@ var recentlyAddedTitle;
 var mostPlayedTitle;
 var leastPlayedTitle;
 
+var unknownTitleL10nId = 'unknownTitle';
+var unknownArtistL10nId = 'unknownArtist';
+var unknownAlbumL10nId = 'unknownAlbum';
+
 // The MediaDB object that manages the filesystem and the database of metadata
 // See init()
 var musicdb;
@@ -238,8 +242,14 @@ function showOverlay(id) {
   var title = navigator.mozL10n.get(id + '-title');
   var text = navigator.mozL10n.get(id + '-text');
 
-  document.getElementById('overlay-title').textContent = title;
-  document.getElementById('overlay-text').textContent = text;
+  var titleElement = document.getElementById('overlay-title');
+  var textElement = document.getElementById('overlay-text');
+
+  titleElement.textContent = title;
+  titleElement.dataset.l10nId = id + '-title';
+  textElement.textContent = text;
+  textElement.dataset.l10nId = id + '-text';
+
   document.getElementById('overlay').classList.remove('hidden');
 }
 
@@ -579,7 +589,10 @@ var TilesView = {
     var albumName = document.createElement('div');
     albumName.className = 'tile-title-album';
     artistName.textContent = result.metadata.artist || unknownArtist;
+    artistName.dataset.l10nId =
+      result.metadata.artist ? '' : unknownArtistL10nId;
     albumName.textContent = result.metadata.album || unknownAlbum;
+    albumName.dataset.l10nId = result.metadata.album ? '' : unknownAlbumL10nId;
     titleBar.appendChild(artistName);
 
     // There are 6 tiles in one group
@@ -756,6 +769,7 @@ function createListElement(option, data, index, highlight) {
       var titleSpan = document.createElement('span');
       titleSpan.className = 'list-playlist-title';
       titleSpan.textContent = data.metadata.title || unknownTitle;
+      titleSpan.dataset.l10nId = data.metadata.title ? '' : unknownTitleL10nId;
 
       a.dataset.keyRange = 'all';
       a.dataset.option = data.option;
@@ -788,6 +802,8 @@ function createListElement(option, data, index, highlight) {
         var artistSpan = document.createElement('span');
         artistSpan.className = 'list-single-title';
         artistSpan.textContent = data.metadata.artist || unknownArtist;
+        artistSpan.dataset.l10nId =
+          data.metadata.artist ? '' : unknownArtistL10nId;
 
         // Highlight the text when the highlight argument is passed
         // This should only happens when we are creating searched results
@@ -802,10 +818,16 @@ function createListElement(option, data, index, highlight) {
         artistSpan.className = 'list-sub-title';
         if (option === 'album') {
           albumOrTitleSpan.textContent = data.metadata.album || unknownAlbum;
+          albumOrTitleSpan.dataset.l10nId =
+            data.metadata.album ? '' : unknownAlbumL10nId;
         } else {
           albumOrTitleSpan.textContent = data.metadata.title || unknownTitle;
+          albumOrTitleSpan.dataset.l10nId =
+            data.metadata.title ? '' : unknownTitleL10nId;
         }
         artistSpan.textContent = data.metadata.artist || unknownArtist;
+        artistSpan.dataset.l10nId =
+          data.metadata.artist ? '' : unknownArtistL10nId;
 
         // Highlight the text when the highlight argument is passed
         // This should only happens when we are creating searched results
