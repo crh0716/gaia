@@ -18,6 +18,73 @@ var Settings = {
         settings : null;
   },
 
+  _transit: function(oldPanel, newPanel, callback) {
+    if (this._screenType === 'large') {
+      this._pageTransitions['twoColumn'](oldPanel, newPanel, callback);
+    } else {
+      this._pageTransitions['oneColumn'](oldPanel, newPanel, callback);
+    }
+  },
+
+  _pageTransitions: {
+    oneColumn: function(oldPanel, newPanel, callback) {
+      // switch previous/current/forward classes
+      // FIXME: The '.peek' is here to avoid an ugly white
+      // flickering when transitioning (gecko 18)
+      // the forward class helps us 'peek' in the right direction
+      oldPanel.className = newPanel.className ?
+                            'peek' : 'peek previous forward';
+      newPanel.className = newPanel.className ?
+                            'current peek' : 'peek current forward';
+
+      /**
+       * Most browsers now scroll content into view taking CSS transforms into
+       * account.  That's not what we want when moving between <section>s,
+       * because the being-moved-to section is offscreen when we navigate to its
+       * #hash.  The transitions assume the viewport is always at document 0,0.
+       * So add a hack here to make that assumption true again.
+       * https://bugzilla.mozilla.org/show_bug.cgi?id=803170
+       */
+      if ((window.scrollX !== 0) || (window.scrollY !== 0)) {
+        window.scrollTo(0, 0);
+      }
+
+      window.addEventListener('transitionend', function paintWait() {
+        window.removeEventListener('transitionend', paintWait);
+
+        // We need to wait for the next tick otherwise gecko gets confused
+        setTimeout(function nextTick() {
+          oldPanel.classList.remove('peek');
+          oldPanel.classList.remove('forward');
+          newPanel.classList.remove('peek');
+          newPanel.classList.remove('forward');
+
+          // Bug 818056 - When multiple visible panels are present,
+          // they are not painted correctly. This appears to fix the issue.
+          // Only do this after the first load
+          if (oldPanel.className === 'current')
+            return;
+
+          oldPanel.addEventListener('transitionend',
+            function onTransitionEnd(e) {
+              oldPanel.removeEventListener('transitionend', onTransitionEnd);
+              if (callback) {
+                callback();
+              }
+          });
+        });
+      });
+    },
+
+    twoColumn: function(oldPanel, newPanel, callback) {
+      oldPanel.className = 'previous';
+      newPanel.className = 'current';
+      if (callback) {
+        callback();
+      }
+    }
+  },
+
   _currentPanel: '#root',
 
   get currentPanel() {
@@ -44,63 +111,23 @@ var Settings = {
 
     // load panel (+ dependencies) if necessary -- this should be synchronous
     this.lazyLoad(newPanel);
-
-    // switch previous/current/forward classes
-    // FIXME: The '.peek' is here to avoid an ugly white
-    // flickering when transitioning (gecko 18)
-    // the forward class helps us 'peek' in the right direction
-    oldPanel.className = newPanel.className ? 'peek' : 'peek previous forward';
-    newPanel.className = newPanel.className ?
-                           'current peek' : 'peek current forward';
-
-    /**
-     * Most browsers now scroll content into view taking CSS transforms into
-     * account.  That's not what we want when moving between <section>s,
-     * because the being-moved-to section is offscreen when we navigate to its
-     * #hash.  The transitions assume the viewport is always at document 0,0.
-     * So add a hack here to make that assumption true again.
-     * https://bugzilla.mozilla.org/show_bug.cgi?id=803170
-     */
-    if ((window.scrollX !== 0) || (window.scrollY !== 0)) {
-      window.scrollTo(0, 0);
-    }
-
-    window.addEventListener('transitionend', function paintWait() {
-      window.removeEventListener('transitionend', paintWait);
-
-      // We need to wait for the next tick otherwise gecko gets confused
-      setTimeout(function nextTick() {
-        oldPanel.classList.remove('peek');
-        oldPanel.classList.remove('forward');
-        newPanel.classList.remove('peek');
-        newPanel.classList.remove('forward');
-
-        // Bug 818056 - When multiple visible panels are present,
-        // they are not painted correctly. This appears to fix the issue.
-        // Only do this after the first load
-        if (oldPanel.className === 'current')
-          return;
-
-        oldPanel.addEventListener('transitionend', function onTransitionEnd(e) {
-          oldPanel.removeEventListener('transitionend', onTransitionEnd);
-          var detail = {
-            previous: oldPanelHash,
-            current: newPanelHash
-          };
-          var event = new CustomEvent('panelready', {detail: detail});
-          window.dispatchEvent(event);
-          switch (newPanel.id) {
-            case 'about-licensing':
-              // Workaround for bug 825622, remove when fixed
-              var iframe = document.getElementById('os-license');
-              iframe.src = iframe.dataset.src;
-              break;
-            case 'wifi':
-              PerformanceTestingHelper.dispatch('settings-panel-wifi-visible');
-              break;
-          }
-        });
-      });
+    this._transit(oldPanel, newPanel, function() {
+      var detail = {
+        previous: oldPanelHash,
+        current: newPanelHash
+      };
+      var event = new CustomEvent('panelready', {detail: detail});
+      window.dispatchEvent(event);
+      switch (newPanel.id) {
+        case 'about-licensing':
+          // Workaround for bug 825622, remove when fixed
+          var iframe = document.getElementById('os-license');
+          iframe.src = iframe.dataset.src;
+          break;
+        case 'wifi':
+          PerformanceTestingHelper.dispatch('settings-panel-wifi-visible');
+          break;
+      }
     });
   },
 
@@ -185,6 +212,7 @@ var Settings = {
   },
 
   _initialized: false,
+  _screenType: 'large',
 
   init: function settings_init() {
     this._initialized = true;
@@ -195,9 +223,21 @@ var Settings = {
 
     // register web activity handler
     navigator.mozSetMessageHandler('activity', this.webActivityHandler);
+    this.initUI();
 
     // preset all inputs that have a `name' attribute
     this.presetPanel();
+  },
+
+  initUI: function settings_initUI() {
+    document.body.dataset.screenType = this._screenType;
+
+    var self = this;
+    if (this._screenType === 'large') {
+      LazyLoader.load(['js/breadcrumb.js'], function() {
+        Breadcrumb(document.getElementById('breadcrumb'), self);
+      });
+    }
   },
 
   loadPanel: function settings_loadPanel(panel) {
@@ -835,10 +875,10 @@ window.addEventListener('load', function loadSettings() {
   window.removeEventListener('load', loadSettings);
   window.addEventListener('change', Settings);
 
-  navigator.addIdleObserver({
+  /*navigator.addIdleObserver({
     time: 3,
     onidle: Settings.loadPanelStylesheetsIfNeeded.bind(Settings)
-  });
+  });*/
 
   Settings.init();
   handleRadioAndCardState();

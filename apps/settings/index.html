@@ -17,6 +17,7 @@
     <link rel="stylesheet" type="text/css" href="style/lists.css"/>
     <link rel="stylesheet" type="text/css" href="style/icons.css"/>
     <link rel="stylesheet" type="text/css" href="style/settings.css"/>
+    <link rel="stylesheet" type="text/css" href="style/settings_large.css"/>
 
     <!-- Panel Stylesheets
     <link rel="stylesheet" type="text/css" href="shared/style/action_menu.css"/>
@@ -71,7 +72,7 @@
 
     <!-- all non-#root panels will lazy-load their own scripts -->
   </head>
-  <body class="skin-organic uninit">
+  <body class="skin-organic uninit large">
 
     <!--
       - Lazy-Loading: to avoid parsing all settings panels before necessary, the
@@ -2918,6 +2919,14 @@
       <script src="js/icc.js"></script>
       -->
     </section>
+
+    <section role="region" id="breadcrumb" hidden>
+       <header>
+         <nav class="breadcrumb-container">
+          <a class="breadcrumb-placeholder"></a>
+         </nav>
+       </header>
+     </section>
 
     <!-- Main List -->
     <section role="region" id="root" class="current">

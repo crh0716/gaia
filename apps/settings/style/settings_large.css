@@ -1,0 +1,74 @@
+
+
+body[data-screen-type="large"] section[role="region"] {
+  transform: translateX(0);
+  left: 40rem;
+  width: calc(100% - 40rem);
+  display: none;
+}
+
+body[data-screen-type="large"] section[role="region"].current {
+  transform: translateX(0);
+  display: block;
+}
+
+body[data-screen-type="large"] #root {
+  display: block !important;
+  left: 0;
+  width: 40rem;
+}
+
+body[data-screen-type="large"] section[role="region"] > header > a {
+  display: none;
+}
+
+/******************************************************************************
+ * Breadcrumb
+ */
+
+body[data-screen-type="large"] #breadcrumb {
+  display: block;
+}
+
+#breadcrumb {
+  position: absolute;
+  top: 0;
+  left: 40rem;
+  width: calc(100% - 40rem);
+  height: 5rem;
+  z-index: 15;
+}
+
+#breadcrumb header {
+  background: url(images/header_column.png);
+}
+
+#breadcrumb nav {
+  padding-left: 5rem;
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+#breadcrumb nav .item {
+  background: url(images/tab_L.png) no-repeat left center,
+              url(images/tab_R.png) no-repeat right center;
+  min-width: 6rem;
+  padding-left: 0.8rem;
+  padding-right: 1.9rem;
+  margin-right: 2rem;
+}
+
+#breadcrumb nav .item:nth-child(2) {
+  flex: 1 0 auto;
+}
+
+/* A placeholder can avoid the last item being extended to the end. */
+#breadcrumb nav .breadcrumb-placeholder {
+  opacity: 0;
+  flex: 99999;
+}
+
+#breadcrumb nav h1 {
+  margin: 0;
+  background: url(images/tab_bg.png) repeat-x center center;
+}
