@@ -89,7 +89,7 @@ var Breadcrumb = function(_root, settings) {
     header.textContent = title;
 
     link.addEventListener('click', function() {
-      settings.currentPanel(hash);
+      settings.currentPanel = hash;
     });
 
     link.appendChild(header);

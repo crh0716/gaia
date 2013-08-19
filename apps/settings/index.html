@@ -72,7 +72,7 @@
 
     <!-- all non-#root panels will lazy-load their own scripts -->
   </head>
-  <body class="skin-organic uninit large">
+  <body class="skin-organic uninit">
 
     <!--
       - Lazy-Loading: to avoid parsing all settings panels before necessary, the
@@ -94,10 +94,10 @@
       -->
 
     <!-- Connectivity :: Wi-Fi :: Network Status -->
-    <section role="region" id="wifi-status">
+    <section role="region" class="dialog" id="wifi-status">
       <!--
       <header>
-        <button type="reset"><span data-l10n-id="back" class="icon icon-back">Back</span></button>
+        <button type="reset"><span data-l10n-id="close" class="icon icon-close">Close</span></button>
         <menu type="toolbar">
           <button type="submit"><span data-l10n-id="forget">Forget</span></button>
         </menu>
@@ -132,10 +132,10 @@
     </section>
 
     <!-- Connectivity :: Wi-Fi :: Network Authentication -->
-    <section role="region" id="wifi-auth">
+    <section role="region" class="dialog" id="wifi-auth">
       <!--
       <header>
-        <button type="reset"><span data-l10n-id="back" class="icon icon-back">Back</span></button>
+        <button type="reset"><span data-l10n-id="close" class="icon icon-close">Close</span></button>
         <menu type="toolbar">
           <button type="submit"><span data-l10n-id="ok">OK</span></button>
         </menu>
@@ -188,10 +188,10 @@
     </section>
 
     <!-- Connectivity :: Wi-Fi :: Join Hidden Network -->
-    <section role="region" id="wifi-joinHidden">
+    <section role="region" class="dialog" id="wifi-joinHidden">
       <!--
       <header>
-        <button type="reset"><span data-l10n-id="back" class="icon icon-back">Back</span></button>
+        <button type="reset"><span data-l10n-id="close" class="icon icon-close">Close</span></button>
         <menu type="toolbar">
           <button type="submit"><span data-l10n-id="ok">OK</span></button>
         </menu>
@@ -250,10 +250,10 @@
     </section>
 
     <!-- Connectivity :: Wi-Fi :: WPS -->
-    <section role="region" id="wifi-wps">
+    <section role="region" class="dialog" id="wifi-wps">
       <!--
       <header>
-        <button type="reset"><span data-l10n-id="back" class="icon icon-back">Back</span></button>
+        <button type="reset"><span data-l10n-id="close" class="icon icon-close">Close</span></button>
         <menu type="toolbar">
           <button type="submit"><span data-l10n-id="ok">OK</span></button>
         </menu>
@@ -407,10 +407,10 @@
     </section>
 
     <!-- Connectivity :: Call :: Call Forwarding Not Reachable -->
-    <section role="region" id="call-cf-notReachableSettings">
+    <section role="region" class="dialog" id="call-cf-notReachableSettings">
       <!--
       <header>
-        <button type="reset"><span data-l10n-id="back" class="icon icon-back">Back</span></button>
+        <button type="reset"><span data-l10n-id="close" class="icon icon-close">Close</span></button>
         <menu type="toolbar">
           <button type="submit"><span data-l10n-id="ok">OK</span></button>
         </menu>
@@ -437,10 +437,10 @@
     </section>
 
     <!-- Connectivity :: Call :: Call Forwarding No Reply -->
-    <section role="region" id="call-cf-noReplySettings">
+    <section role="region" class="dialog" id="call-cf-noReplySettings">
       <!--
       <header>
-        <button type="reset"><span data-l10n-id="back" class="icon icon-back">Back</span></button>
+        <button type="reset"><span data-l10n-id="close" class="icon icon-close">Close</span></button>
         <menu type="toolbar">
           <button type="submit"><span data-l10n-id="ok">OK</span></button>
         </menu>
@@ -467,10 +467,10 @@
     </section>
 
     <!-- Connectivity :: Call :: Call Forwarding Mobile Busy -->
-    <section role="region" id="call-cf-mobileBusySettings">
+    <section role="region" class="dialog" id="call-cf-mobileBusySettings">
       <!--
       <header>
-        <button type="reset"><span data-l10n-id="back" class="icon icon-back">Back</span></button>
+        <button type="reset"><span data-l10n-id="close" class="icon icon-close">Close</span></button>
         <menu type="toolbar">
           <button type="submit"><span data-l10n-id="ok">OK</span></button>
         </menu>
@@ -497,10 +497,10 @@
     </section>
 
     <!-- Connectivity :: Call :: Call Forwarding Unconditional -->
-    <section role="region" id="call-cf-unconditionalSettings">
+    <section role="region" class="dialog" id="call-cf-unconditionalSettings">
       <!--
       <header>
-        <button type="reset"><span data-l10n-id="back" class="icon icon-back">Back</span></button>
+        <button type="reset"><span data-l10n-id="close" class="icon icon-close">Close</span></button>
         <menu type="toolbar">
           <button type="submit"><span data-l10n-id="ok">OK</span></button>
         </menu>
@@ -527,10 +527,10 @@
     </section>
 
     <!-- Connectivity :: Call :: Voice Mail -->
-    <section role="region" id="call-voiceMailSettings">
+    <section role="region" class="dialog" id="call-voiceMailSettings">
       <!--
       <header>
-        <button type="reset"><span data-l10n-id="back" class="icon icon-back">Back</span></button>
+        <button type="reset"><span data-l10n-id="close" class="icon icon-close">Close</span></button>
         <menu type="toolbar">
           <button type="submit"><span data-l10n-id="ok">OK</span></button>
         </menu>
@@ -718,10 +718,10 @@
     </section>
 
     <!-- Connectivity :: Cellular & Data :: Data Settings -->
-    <section role="region" id="carrier-dataSettings">
+    <section role="region" class="dialog" id="carrier-dataSettings">
       <!--
       <header>
-        <button type="reset"><span data-l10n-id="back" class="icon icon-back">Back</span></button>
+        <button type="reset"><span data-l10n-id="close" class="icon icon-close">Close</span></button>
         <menu type="toolbar">
           <button type="submit"><span data-l10n-id="ok">OK</span></button>
         </menu>
@@ -782,10 +782,10 @@
     </section>
 
     <!-- Connectivity :: Cellular & Data :: Message Settings -->
-    <section role="region" id="carrier-mmsSettings">
+    <section role="region" class="dialog" id="carrier-mmsSettings">
       <!--
       <header>
-        <button type="reset"><span data-l10n-id="back" class="icon icon-back">Back</span></button>
+        <button type="reset"><span data-l10n-id="close" class="icon icon-close">Close</span></button>
         <menu type="toolbar">
           <button type="submit"><span data-l10n-id="ok">OK</span></button>
         </menu>
@@ -890,10 +890,10 @@
     </section>
 
     <!-- Connectivity :: Cellular & Data :: A-GPS Settings -->
-    <section role="region" id="carrier-suplSettings">
+    <section role="region" class="dialog" id="carrier-suplSettings">
       <!--
       <header>
-        <button type="reset"><span data-l10n-id="back" class="icon icon-back">Back</span></button>
+        <button type="reset"><span data-l10n-id="close" class="icon icon-close">Close</span></button>
         <menu type="toolbar">
           <button type="submit"><span data-l10n-id="ok">OK</span></button>
         </menu>
@@ -1156,10 +1156,10 @@
     </section>
 
     <!-- Connectivity :: Internet Sharing :: Portable Wi-Fi Hotspot -->
-    <section role="region" id="hotspot-wifiSettings">
+    <section role="region" id="hotspot-wifiSettings" class="dialog">
       <!--
       <header>
-        <button type="reset"><span data-l10n-id="back" class="icon icon-back">Back</span></button>
+        <button type="reset"><span data-l10n-id="close" class="icon icon-close">Close</span></button>
         <menu type="toolbar">
           <button type="submit"><span data-l10n-id="ok">OK</span></button>
         </menu>
@@ -1265,11 +1265,11 @@
     </section>
 
     <!-- Personalization :: Sound :: Sound Selection -->
-    <section role="region" id="sound-selection">
+    <section role="region" id="sound-selection" class="dialog">
       <!--
       <header>
         <button type="reset">
-          <span data-l10n-id="back" class="icon icon-back">Back</span>
+          <span data-l10n-id="closr" class="icon icon-close">Close</span>
         </button>
         <menu type="toolbar">
           <button data-l10n-id="done" type="submit">Done</button>
@@ -1909,11 +1909,11 @@
     </section>
 
     <!-- Security :: SIM Security :: SIM PIN Input -->
-    <section role="region" id="simpin-dialog">
+    <section role="region" id="simpin-dialog" class="dialog">
       <!--
       <header>
         <button type="reset">
-          <span data-l10n-id="back" class="icon icon-back">Back</span>
+          <span data-l10n-id="close" class="icon icon-close">Close</span>
         </button>
         <menu type="toolbar">
         <button data-l10n-id="done" type="submit">Done</button>
@@ -3101,6 +3101,8 @@
           </li>
         </ul>
       </div>
+    </section>
+    <section id="dialog-overlay" hidden>
     </section>
   </body>
 </html>

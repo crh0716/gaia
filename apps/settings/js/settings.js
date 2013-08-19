@@ -77,8 +77,20 @@ var Settings = {
     },
 
     twoColumn: function(oldPanel, newPanel, callback) {
-      oldPanel.className = 'previous';
-      newPanel.className = 'current';
+      var overlay = document.getElementById('dialog-overlay');
+      if (newPanel.classList.contains('dialog')) {
+        overlay.hidden = false;
+        oldPanel.classList.remove('previous');
+        oldPanel.classList.add('current');
+        newPanel.classList.remove('previous');
+        newPanel.classList.add('current');
+      } else {
+        overlay.hidden = true;
+        oldPanel.classList.remove('current');
+        oldPanel.classList.add('previous');
+        newPanel.classList.remove('previous');
+        newPanel.classList.add('current');
+      }
       if (callback) {
         callback();
       }
@@ -217,13 +229,13 @@ var Settings = {
   init: function settings_init() {
     this._initialized = true;
 
+    this.initUI();
     if (!this.mozSettings || !navigator.mozSetMessageHandler) {
       return;
     }
 
     // register web activity handler
     navigator.mozSetMessageHandler('activity', this.webActivityHandler);
-    this.initUI();
 
     // preset all inputs that have a `name' attribute
     this.presetPanel();
