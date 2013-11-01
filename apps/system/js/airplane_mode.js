@@ -4,6 +4,18 @@
 'use strict';
 
 var AirplaneMode = {
+  _ready: function(callback) {
+    if (document && (document.readyState === 'complete' ||
+                     document.readyState === 'interactive')) {
+      setTimeout(callback);
+    } else {
+      window.addEventListener('load', function onload() {
+        window.removeEventListener('load', onload);
+        callback();
+      });
+    }
+  },
+
   enabled: false,
 
   init: function apm_init() {
@@ -36,6 +48,7 @@ var AirplaneMode = {
     // turn off the mozSetting corresponding to `key'
     // and remember its initial state by storing it in another setting
     function suspend(key) {
+      dump('=== suspend ' + key);
       var enabled = settings[key + '.enabled'];
       var suspended = settings[key + '.suspended'];
       if (suspended)
@@ -57,6 +70,7 @@ var AirplaneMode = {
     // turn on the mozSetting corresponding to `key'
     // if it has been suspended by the airplane mode
     function restore(key) {
+      dump('=== restore ' + key);
       var suspended = settings[key + '.suspended'];
 
       // clear the 'suspended' state
@@ -72,10 +86,11 @@ var AirplaneMode = {
       }
     }
 
+    var mozSettings = window.navigator.mozSettings;
+    var mobileConnection = window.navigator.mozMobileConnection;
     var bluetooth = window.navigator.mozBluetooth;
     var wifiManager = window.navigator.mozWifiManager;
-    var mobileData = window.navigator.mozMobileConnection &&
-      window.navigator.mozMobileConnection.data;
+    var mobileData = mobileConnection && mobileConnection.data;
     var fmRadio = window.navigator.mozFMRadio;
 
     // Note that we don't restore Wifi tethering when leaving airplane mode
@@ -83,7 +98,7 @@ var AirplaneMode = {
     // established.
 
     var self = this;
-    SettingsListener.observe('ril.radio.disabled', false, function(value) {
+    function updateStatus(value) {
       if (value) {
         // Entering airplane mode.
         self.enabled = true;
@@ -140,6 +155,23 @@ var AirplaneMode = {
           restore('geolocation');
         }
       }
+    }
+
+    // Initialize radio state
+    var request = mozSettings.createLock().get('ril.radio.disabled');
+    request.onsuccess = function(e) {
+      var disabled = !!request.result['ril.radio.disabled'];
+      self._ready(function() {
+        mobileConnection.setRadioEnabled(!disabled);
+        updateStatus(disabled);
+      });
+    };
+
+    // Observe settings changes
+    mozSettings.addObserver('ril.radio.disabled', function(e) {
+      var radioDisabled = e.settingValue;
+      dump('=== system: ril.radio.disabled ' + radioDisabled);
+      updateStatus(radioDisabled);
     });
   }
 };

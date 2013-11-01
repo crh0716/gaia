@@ -23,14 +23,7 @@ var AirplaneMode = {
    */
   _doNotify: false,
 
-  element: document.querySelector('input[name="ril.radio.disabled"]'),
-
-  /**
-   * Enable the radio state
-   */
-  enableRadioSwitch: function() {
-    this.element.disabled = false;
-  },
+  element: document.querySelector('#airplaneMode-input'),
 
   /**
    * Notifies apps that components are in a stable state
@@ -44,15 +37,53 @@ var AirplaneMode = {
     this._ops--;
     if (this._ops === 0) {
       this._doNotify = false;
-      this.enableRadioSwitch();
+      this._enableRadioSwitch();
     }
   },
 
   /**
-   * Called when the user interacts with the airplane_mode switch
+   * Enable the radio switch
    */
-  handleEvent: function(e) {
-    this.element.disabled = true;
+  _enableRadioSwitch: function() {
+    this.element.disabled = false;
+  },
+
+  _initRadioSwitch: function(checkbox) {
+    var settings = Settings.mozSettings;
+    var self = this;
+
+    var _setRadioEnabled = function(enabled, onsuccess, onerror) {
+      onsuccess = onsuccess || function() {};
+      onerror = onerror || function() {};
+
+      var mobileConnection = getMobileConnection();
+      if (!mobileConnection) {
+        onerror();
+      }
+
+      var req = mobileConnection.setRadioEnabled(enabled);
+      req.onsuccess = onsuccess;
+      req.onerror = onerror;
+    };
+
+    // Called when the user interacts with the airplane_mode switch
+    var onchange = function(e) {
+      dump('=== checkbox changed ' + this.checked);
+
+      this.disabled = true;
+      var enabled = !this.checked;
+      _setRadioEnabled(enabled, function onsuccess() {
+        settings.createLock().set({'ril.radio.disabled': !enabled});
+      });
+    };
+
+    Settings.getSettings(function(result) {
+      self.element.disabled = false;
+      var radioDisabled = result['ril.radio.disabled'];
+      self.element.checked = radioDisabled;
+      // Disable airplane mode when we interact with it
+      self.element.addEventListener('change', self);
+    });
   },
 
   init: function apm_init() {
@@ -63,11 +94,10 @@ var AirplaneMode = {
     if (!settings)
       return;
 
+    // Initialize the airplane mode switch
+    this._initRadioSwitch();
+
     var self = this;
-
-    // Disable airplane mode when we interact with it
-    this.element.addEventListener('change', this);
-
     var mobileDataEnabled = false;
     settings.addObserver('ril.data.enabled', function(e) {
       mobileDataEnabled = e.settingValue;
@@ -114,6 +144,7 @@ var AirplaneMode = {
     var restoreGeolocation = false;
 
     settings.addObserver('ril.radio.disabled', function(e) {
+      dump('=== settings: ril.radio.disabled ' + e.settingValue);
       // Reset notification params
       self._ops = 0;
       self._doNotify = true;

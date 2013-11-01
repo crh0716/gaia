@@ -471,3 +471,58 @@ function getTruncated(oldName, options) {
 
   return newName;
 }
+
+/**
+ *
+ * onchange: function(toggleValue, desiredSettingsValue)
+ */
+
+function SettingsToggle(_input, _key, _handler) {
+  // return null if not checkbox or switch
+  var _inputType = input.type;
+  if (_inputType !== 'checkbox' || _inputType !== 'switch')
+    return null;
+
+  var _settings = window.navigator.mozSettings;
+  if (!_settings)
+    return null;
+
+  var _onhandled = function(settingsValue) {
+    dump('=== change ' + _key + ' to ' + settingsValue);
+    settings.createLock().set({key: settingsValue});
+  };
+
+  // Called when the user interacts with the switch
+  var _onchange = function() {
+    dump('=== checkbox changed ' + _input.checked);
+    _handler.call(_input.checked, _onhandled);
+  };
+
+  var _init = function() {
+    _input.disabled = true;
+
+    // Initialize the toggle based on the associating key.
+    var _req = _settings.createLock.get(key);
+    _req.onsuccess = function(result) {
+      var value = result[_key];
+
+      _input.disabled = false;
+      _input.checked = value;
+
+      _onchange(value);
+      _input.addEventListener('change', _onchange);
+    };
+  };
+
+  _init();
+
+  return {
+    get disabled: function() {
+      return _input.disabled;
+    }
+    set disabled: function(disabled) {
+      _input.disabled = disabled;
+    }
+  };
+}
+
