@@ -95,7 +95,7 @@ var AirplaneMode = {
       return;
 
     var self = this;
-    this._initRadioSwitch();
+    //this._initRadioSwitch();
 
     var mobileDataEnabled = false;
     settings.addObserver('ril.data.enabled', function(e) {
