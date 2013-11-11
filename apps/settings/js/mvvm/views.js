@@ -9,6 +9,7 @@ var ListView = function(root, observableArray, templateFunc) {
   var _root = root;
   var _templateFunc = templateFunc;
   var _enabled = true;
+  var _templateObjs = {};
 
   var _handleEvent = function(event) {
     // Ignore the change event when the list view is not enabled.
@@ -42,9 +43,10 @@ var ListView = function(root, observableArray, templateFunc) {
     var referenceElement =
       _root.querySelector('li:nth-child(' + (index + 1) + ')');
     for (var i = items.length - 1; i >= 0; i--) {
-      var curElement = _templateFunc(items[i]);
-      _root.insertBefore(curElement, referenceElement);
-      referenceElement = curElement;
+      var templateObj = _templateFunc(items[i]);
+      _root.insertBefore(templateObj.element, referenceElement);
+      referenceElement = templateObj.element;
+      _templateObjs[templateObj.element] = templateObj;
     }
   };
 
@@ -76,7 +78,7 @@ var ListView = function(root, observableArray, templateFunc) {
   var _replace = function(index, value) {
     var element = _root.querySelector('li:nth-child(' + (index + 1) + ')');
     if (element) {
-      _templateFunc(value, element);
+      _templateObjs[element].refresh(value);
     }
   };
 

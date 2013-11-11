@@ -15,6 +15,13 @@ var Observable = function(obj) {
       if (handlers) {
         handlers.push(handler);
       }
+    },
+    unobserve: function o_unobserve(p, targetHandler) {
+      if (_eventHandlers[p]) {
+        _eventHandlers[p] = handlers.some(function(handler) {
+          return (handler !== targetHandler);
+        }) || [];
+      }
     }
   };
 
