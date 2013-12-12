@@ -710,6 +710,7 @@ var Calls = (function(window, document, undefined) {
       if (!result.cdma)
         return;
 
+      var voicePrivacyHelper = VoicePrivacySettingsHelper();
       var privacyModeItem =
         document.getElementById('menuItem-voicePrivacyMode');
       var privacyModeInput =
@@ -732,6 +733,9 @@ var Calls = (function(window, document, undefined) {
         function vpm_inputChanged() {
           var originalValue = !this.checked;
           var setReq = mobileConnection.setVoicePrivacyMode(this.checked);
+          setReq.onsuccess = function set_vpm_success() {
+            voicePrivacyHelper.setEnabled(0, !originalValue);
+          };
           setReq.onerror = function get_vpm_error() {
             // restore the value if failed.
             privacyModeInput.checked = originalValue;
