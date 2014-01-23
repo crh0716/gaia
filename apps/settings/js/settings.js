@@ -1,6 +1,3 @@
-/* -*- Mode: js; js-indent-level: 2; indent-tabs-mode: nil -*- */
-/* vim: set shiftwidth=2 tabstop=2 autoindent cindent expandtab: */
-
 'use strict';
 
 /**
@@ -41,7 +38,7 @@ var Settings = {
       if (panelsWithCurrentClass.length === 1 &&
         panelsWithCurrentClass[0].id === 'root') {
         // go to default panel
-        Settings.currentPanel = Settings.defaultPanelForTablet;
+        Settings.navigate(Settings.DEFAULT_TABLET_PANEL_ID);
       }
     }
     Settings._isTabletAndLandscapeLastTime = isTabletAndLandscapeThisTime;
@@ -55,22 +52,23 @@ var Settings = {
     }
   },
 
-  defaultPanelForTablet: '#wifi',
+  DEFAULT_TABLET_PANEL_ID: '#wifi',
+  DEFAULT_PANEL_ID: '#root',
 
-  _currentPanel: '#root',
+  _currentPanelId: '#root',
 
   _currentActivity: null,
 
-  get currentPanel() {
-    return this._currentPanel;
+  get currentPanelId() {
+    return this._currentPanelId;
   },
 
-  set currentPanel(hash) {
-    if (!hash.startsWith('#')) {
-      hash = '#' + hash;
+  navigate: function s_navigate(panelId, options) {
+    if (!panelId.startsWith('#')) {
+      panelId = '#' + panelId;
     }
 
-    if (hash == this._currentPanel) {
+    if (panelId == this._currentPanelId) {
       return;
     }
 
@@ -78,19 +76,20 @@ var Settings = {
     // close the activity.
     // XXX this assumes the 'back' button of the activity panel
     //     points to the root panel.
-    if (this._currentActivity !== null && hash === '#root') {
+    if (this._currentActivity !== null &&
+        panelId === Settings.DEFAULT_PANEL_ID) {
       Settings.finishActivityRequest();
       return;
     }
 
-    if (hash === '#wifi') {
+    if (panelId === Settings.DEFAULT_TABLET_PANEL_ID) {
       PerformanceTestingHelper.dispatch('start');
     }
-    var oldPanelHash = this._currentPanel;
-    var oldPanel = document.querySelector(this._currentPanel);
-    this._currentPanel = hash;
-    var newPanelHash = this._currentPanel;
-    var newPanel = document.querySelector(this._currentPanel);
+    var oldPanelId = this._currentPanelId;
+    var oldPanel = document.querySelector(this._currentPanelId);
+    this._currentPanelId = panelId;
+    var newPanelId = this._currentPanelId;
+    var newPanel = document.querySelector(this._currentPanelId);
 
     // load panel (+ dependencies) if necessary -- this should be synchronous
     this.lazyLoad(newPanel);
@@ -112,18 +111,18 @@ var Settings = {
   // Early initialization of parts of the application that don't
   // depend on the DOM being loaded.
   preInit: function settings_preInit(
-    SettingsCache, PanelUtils, PageTransitions) {
+    SettingsCache, PanelHandlers, PageTransitions) {
     var settings = this.mozSettings;
     if (!settings)
       return;
 
     this.SettingsCache = SettingsCache;
-    this.PanelUtils = PanelUtils;
+    this.PanelHandlers = PanelHandlers;
     this.PageTransitions = PageTransitions;
 
     // update corresponding setting when it changes
     settings.onsettingchange =
-      this.PanelUtils.onSettingsChange.bind(this, document);
+      this.PanelHandlers.onSettingsChange.bind(this, document);
   },
 
   _initialized: false,
@@ -165,7 +164,7 @@ var Settings = {
   },
 
   afterPanelLoad: function(panel, cb) {
-    this.PanelUtils.activate(panel);
+    this.PanelHandlers.activate(panel);
     if (cb) {
       cb();
     }
@@ -215,7 +214,7 @@ var Settings = {
   },
 
   presetPanel: function settings_presetPanel(panel) {
-    this.PanelUtils.preset(panel);
+    this.PanelHandlers.preset(panel);
   },
 
   // An activity can be closed either by pressing the 'X' button
@@ -287,7 +286,7 @@ var Settings = {
 
         // Go to that section
         setTimeout(function settings_goToSection() {
-          Settings.currentPanel = section;
+          Settings.navigate(section);
         });
         break;
       default:
@@ -305,7 +304,7 @@ var Settings = {
   },
 
   handleEvent: function settings_handleEvent(event) {
-    this.PanelUtils.onInputChange(event);
+    this.PanelHandlers.onInputChange(event);
   },
 
   openDialog: function settings_openDialog(dialogID) {
@@ -482,10 +481,10 @@ window.addEventListener('load', function loadSettings() {
       '(min-width: 768px) and (orientation: landscape)');
     window.addEventListener('screenlayoutchange', Settings.rotate);
 
-    // display of default panel(#wifi) must wait for
+    // display of default panel(DEFAULT_TABLET_PANEL_ID) must wait for
     // lazy-loaded script - wifi_helper.js - loaded
     if (Settings.isTabletAndLandscape()) {
-      Settings.currentPanel = Settings.defaultPanelForTablet;
+      Settings.navigate(Settings.DEFAULT_TABLET_PANEL_ID);
     }
   }
 
@@ -509,13 +508,13 @@ window.addEventListener('load', function loadSettings() {
   }
 
   // startup
-  document.addEventListener('click', Settings.PanelUtils.onLinkClick);
+  document.addEventListener('click', Settings.PanelHandlers.onLinkClick);
 });
 
 // back button = close dialog || back to the root page
 // + prevent the [Return] key to validate forms
 window.addEventListener('keydown', function handleSpecialKeys(event) {
-  if (Settings.currentPanel != '#root' &&
+  if (Settings.currentPanelId != Settings.DEFAULT_PANEL_ID &&
       event.keyCode === event.DOM_VK_ESCAPE) {
     event.preventDefault();
     event.stopPropagation();
@@ -525,7 +524,7 @@ window.addEventListener('keydown', function handleSpecialKeys(event) {
       dialog.classList.remove('active');
       document.body.classList.remove('dialog');
     } else {
-      Settings.currentPanel = '#root';
+      Settings.navigate(Settings.DEFAULT_PANEL_ID);
     }
   } else if (event.keyCode === event.DOM_VK_RETURN) {
     event.target.blur();

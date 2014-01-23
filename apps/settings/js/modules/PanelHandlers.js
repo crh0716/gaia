@@ -1,5 +1,6 @@
 /**
- * @fileoverview PanelUtils
+ * @fileoverview handle panel actions like
+ * preset, activate, onLinkClick, onSettingsChange, onInputChange.
  */
 define(['modules/SettingsCache'], function(SettingsCache) {
   'use strict';
@@ -184,7 +185,7 @@ define(['modules/SettingsCache'], function(SettingsCache) {
     /*require(['SettingsService'], function(SettingsService) {
       SettingsService.navigate(href.slice(1));
     });*/
-    Settings.currentPanel = href;
+    Settings.navigate(href);
     event.preventDefault();
   };
 
