@@ -1,34 +1,68 @@
-/* global ListView:false */
-/* global ObservableArray:false */
+/* global define */
 'use strict';
 
 // The views are very tightly coupled to models, rather than reimplement model
 // behavior in a mock, rely on tested interfaces on the model instead
-requireApp('settings/js/mvvm/models.js');
-requireApp('settings/js/mvvm/views.js');
-
 suite('ListView', function() {
-
   var suiteSandbox = sinon.sandbox.create();
-  suiteSetup(function() {
-    var OriginalObservableArray = ObservableArray;
-    // stub the real ObservableArray to create spies on observe method
-    suiteSandbox.stub(window, 'ObservableArray', function() {
-      var result = OriginalObservableArray.apply(this, arguments);
-      sinon.spy(result, 'observe');
-      sinon.spy(result, 'unobserve');
-      return result;
-    });
 
+  // Define a shim for ObservableArray that is to be loaded in ListView.
+  // Then we are able to creat a stub on it.
+  var ObservableArrayShimName = 'observable_array_shim' + Date.now();
+  define(ObservableArrayShimName, function() {
+    var ctor = function observable_array_shim() {
+      if (ctor.mInnerFunction) {
+        return ctor.mInnerFunction.apply(this, arguments);
+      }
+    };
+    ctor.mTeardown = function observable_array_shim_teardown() {
+      ctor.mInnerFunction = null;
+    };
+    return ctor;
   });
+
+  suiteSetup(function(done) {
+    // Use the shim in ListView.
+    var map = {
+      'modules/mvvm/list_view': {
+        'modules/mvvm/observable_array': ObservableArrayShimName
+      }
+    };
+
+    testRequire([
+      'modules/mvvm/observable',
+      'modules/mvvm/observable_array',
+      'modules/mvvm/list_view',
+      ObservableArrayShimName
+    ], map,
+    (function(Observable, ObservableArray, ListView, ObservableArrayShim) {
+      this.Observable = Observable;
+      this.ObservableArray = ObservableArray;
+      this.ListView = ListView;
+      this.ObservableArrayShim = ObservableArrayShim;
+
+      // stub the real ObservableArray to create spies on observe method
+      suiteSandbox.stub(this, 'ObservableArray', function() {
+        var result = ObservableArray.apply(this, arguments);
+        sinon.spy(result, 'observe');
+        sinon.spy(result, 'unobserve');
+        return result;
+      });
+      // Redirect the shim to the ObservableArray stub.
+      ObservableArrayShim.mInnerFunction = this.ObservableArray;
+      done();
+    }).bind(this));
+  });
+
   suiteTeardown(function() {
     suiteSandbox.restore();
+    this.ObservableArrayShim.mTeardown();
   });
 
   setup(function() {
     this.array = [];
-    this.observableArray = ObservableArray(this.array);
-    ObservableArray.reset();
+    this.observableArray = this.ObservableArray(this.array);
+    this.ObservableArray.reset();
   });
 
   suite('ListView(<ul>, ObservableArray, function)', function() {
@@ -41,7 +75,7 @@ suite('ListView', function() {
         return document.createElement('li');
       }).bind(this);
       this.sinon.spy(this, 'template');
-      this.listView = ListView(
+      this.listView = this.ListView(
         this.container, this.observableArray, this.template
       );
     });
@@ -242,7 +276,7 @@ suite('ListView', function() {
         });
 
         test('creates and watches an ObservableArray', function() {
-          var withNew = ObservableArray.withArgs(this.array);
+          var withNew = this.ObservableArray.withArgs(this.array);
           assert.ok(withNew.called);
           var observe = withNew.returnValues[0].observe;
           assert.ok(observe.calledWith('insert'));
@@ -345,7 +379,7 @@ suite('ListView', function() {
       }).bind(this);
       this.sinon.spy(this, 'template');
       this.observableArray.push({ count: 0 });
-      this.listView = ListView(
+      this.listView = this.ListView(
         this.container, this.observableArray, this.template
       );
     });
@@ -472,8 +506,8 @@ suite('ListView', function() {
 
   suite('observable hooks', function() {
     setup(function() {
-      this.observable = Observable({ test: 1 });
-      this.observableArray = ObservableArray([this.observable]);
+      this.observable = this.Observable({ test: 1 });
+      this.observableArray = this.ObservableArray([this.observable]);
       this.hook = this.sinon.spy();
       this.template = (function(data, recycle, helper) {
         helper.observeAndCall(data, {
@@ -483,7 +517,7 @@ suite('ListView', function() {
       }).bind(this);
       this.container = document.createElement('ul');
       this.sinon.spy(this, 'template');
-      this.listView = ListView(
+      this.listView = this.ListView(
         this.container, this.observableArray, this.template
       );
     });
@@ -521,9 +555,9 @@ suite('ListView', function() {
 
   suite('destroy', function() {
     setup(function() {
-      this.observableArray = ObservableArray([1, 2, 3]);
+      this.observableArray = this.ObservableArray([1, 2, 3]);
       this.container = document.createElement('div');
-      this.listView = ListView(
+      this.listView = this.ListView(
         this.container, this.observableArray, function() {
           return document.createElement('div');
         }
@@ -557,7 +591,7 @@ suite('ListView', function() {
       this.observableArray.observe.reset();
       this.sinon.spy(this.listView, 'destroy');
       // create a new one, we don't care about what happens to it.
-      ListView(
+      this.ListView(
         this.container, this.observableArray, function() {
           return document.createElement('div');
         }
@@ -578,4 +612,3 @@ suite('ListView', function() {
     });
   });
 });
-

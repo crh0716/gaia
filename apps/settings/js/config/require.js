@@ -11,6 +11,12 @@ require.config({
     'shared/lazy_loader': {
       exports: 'LazyLoader'
     },
+    'shared/keyboard_helper': {
+      exports: 'KeyboardHelper'
+    },
+    'shared/manifest_helper': {
+      exports: 'ManifestHelper'
+    },
     'shared/screen_layout': {
       exports: 'ScreenLayout'
     }

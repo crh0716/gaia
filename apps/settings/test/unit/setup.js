@@ -41,11 +41,9 @@ requireApp('settings/js/vendor/alameda.js', (function() {
       map = null;
     }
 
-    if (map) {
-      requireFunc = requireFunc.config({
-        map: map
-      });
-    }
+    requireFunc = requireFunc.config({
+      map: map || {}
+    });
 
     requireFunc(module, callback);
   };
