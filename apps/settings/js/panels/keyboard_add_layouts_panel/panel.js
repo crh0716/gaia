@@ -1,15 +1,17 @@
+/* globals define */
 /**
  * In the panels we initialize a ListView with the data provided by
  * KeyboardContext. Templates for generating UI elements are also defined
  * here.
  */
-define(['modules/settings_panel', 'modules/keyboard_context',
-        'shared/keyboard_helper', 'modules/mvvm/list_view'],
-  function(SettingsPanel, KeyboardContext, KeyboardHelper, ListView) {
+define(['modules/settings_service', 'modules/settings_panel',
+        'modules/keyboard_context', 'shared/keyboard_helper',
+        'modules/mvvm/list_view'],
+  function(SettingsService, SettingsPanel,
+           KeyboardContext, KeyboardHelper, ListView) {
     'use strict';
 
     return function ctor_addLayoutsPanel() {
-      var _rootElement = null;
       var _listViews = [];
 
       // A template function for generating an UI element for a layout object.
@@ -93,10 +95,9 @@ define(['modules/settings_panel', 'modules/keyboard_context',
       };
 
       var _showEnabledDefaultDialog = function(layout) {
-        require('modules/settings_service')
-          .navigate('keyboard-enabled-default', {
-            layout: layout,
-            origin: 'keyboard-selection-addMore'
+        SettingsService.navigate('keyboard-enabled-default', {
+          layout: layout,
+          origin: 'keyboard-selection-addMore'
         });
       };
 
@@ -114,7 +115,6 @@ define(['modules/settings_panel', 'modules/keyboard_context',
 
       return SettingsPanel({
         onInit: function kalp_onInit(rootElement) {
-          _rootElement = rootElement;
           KeyboardContext.init(function() {
             _initInstalledLayoutListView(rootElement);
           });
