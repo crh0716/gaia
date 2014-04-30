@@ -614,3 +614,6 @@ shared/js/simple_phone_matcher.js
 shared/js/tag_visibility_monitor.js
 shared/js/visibility_monitor.js
 shared/resources/apn/query.js
+apps/settings/js/main.js
+apps/settings/js/modules/settings_service.js
+apps/settings/js/startup.js

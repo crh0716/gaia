@@ -38,3 +38,4 @@ require(['config/require'], function() {
 
   require(['boot']);
 });
+dump('=== perf: main');

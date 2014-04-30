@@ -66,6 +66,10 @@ require.config({
     {
       name: 'panels/screen_lock_passcode/panel',
       exclude: ['main']
+    },
+    {
+      name: 'panels/root/panel',
+      exclude: ['main']
     }
   ]
 });

@@ -57,9 +57,12 @@ define(function(require) {
 
     var _navigate = function ss_navigate(panelId, options, callback) {
       _loadPanel(panelId, function() {
+        dump("=== perf: panel loaded: " + panelId);
         // We have to make sure l10n is ready before navigations
         navigator.mozL10n.once(function() {
+          dump("=== perf: l10n ready: " + panelId);
           PanelCache.get(panelId, function(panel) {
+            dump("=== perf: panel module loaded: " + panelId);
             // Check if there is any pending navigation.
             if (_pendingNavigation) {
               callback();
@@ -81,8 +84,10 @@ define(function(require) {
 
             // Add a timeout for smoother transition.
             setTimeout(function doTransition() {
+              dump('=== perf: before transition: ' + panelId);
               _transit(currentPanelElement, newPanelElement,
                 function transitionCompleted() {
+                  dump('=== perf: after transition: ' + panelId);
                   panel.show(newPanelElement, options);
                   // We don't deactivate the root panel.
                   if (_currentPanel && _currentPanelId !== _rootPanelId) {
@@ -136,6 +141,7 @@ define(function(require) {
        * @param {Function} callback
        */
       navigate: function ss_navigate(panelId, options, callback) {
+        dump("=== perf: navigate: " + panelId);
         // Cache the navigation request if it is navigating.
         if (_navigating) {
           _pendingNavigation = arguments;
@@ -154,6 +160,7 @@ define(function(require) {
           }
 
           if (callback) {
+            dump("=== perf: navigated: " + panelId);
             callback();
           }
         }).bind(this));

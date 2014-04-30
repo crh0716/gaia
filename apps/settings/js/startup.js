@@ -10,3 +10,4 @@
   window.addEventListener('load', startApp, false);
 
 }());
+dump('=== perf: startup');
