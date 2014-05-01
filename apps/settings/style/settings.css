@@ -45,21 +45,39 @@ section[role="region"] {
  */
 section[role="region"] {
   transform: translateX(+100%);
-  transition: transform .4s ease, visibility .4s;
   visibility: hidden;
   height: 0;
 }
 
 section[role="region"].previous {
   transform: translateX(-100%);
-  height: 100%;
 }
 
 section[role="region"].current {
   transform: translateX(0);
   visibility: visible;
-  transition: transform .4s ease;
   height: 100%;
+}
+
+/**
+ * Only use the animation when ready
+ */
+body[data-ready="true"] section[role="region"] {
+  transition: transform .4s ease, visibility .4s;
+}
+
+body[data-ready="true"] section[role="region"].current {
+  transition: transform .4s ease;
+}
+
+#placeholder {
+  transform: translateX(0);
+  visibility: visible;
+  height: 100%;
+}
+
+body[data-ready="true"] #placeholder {
+  visibility: hidden;
 }
 
 /**

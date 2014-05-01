@@ -114,10 +114,11 @@ var Settings = {
     this.LazyLoader = options.LazyLoader;
     this.ScreenLayout = options.ScreenLayout;
 
-    // register web activity handler
-    navigator.mozSetMessageHandler('activity', this.webActivityHandler);
-
-    this.currentPanel = 'root';
+    // handle the activity
+    if (window.currentActivity) {
+      this.webActivityHandler(window.currentActivity);
+    }
+    this.currentPanel = window.DEFAULT_PANEL_ID;
 
     // make operations not block the load time
     setTimeout((function nextTick() {
@@ -194,51 +195,14 @@ var Settings = {
   },
 
   webActivityHandler: function settings_handleActivity(activityRequest) {
-    var name = activityRequest.source.name;
-    var section = 'root';
     Settings._currentActivity = activityRequest;
-    switch (name) {
-      case 'configure':
-        section = Settings._currentActivitySection =
-                  activityRequest.source.data.section;
-
-        if (!section) {
-          // If there isn't a section specified,
-          // simply show ourselve without making ourselves a dialog.
-          Settings._currentActivity = null;
-        }
-
-        // Validate if the section exists
-        var sectionElement = document.getElementById(section);
-        if (!sectionElement || sectionElement.tagName !== 'SECTION') {
-          var msg = 'Trying to open an non-existent section: ' + section;
-          console.warn(msg);
-          activityRequest.postError(msg);
-          return;
-        } else if (section === 'root') {
-          var filterBy = activityRequest.source.data.filterBy;
-          if (filterBy) {
-            document.body.dataset.filterBy = filterBy;
-          }
-        }
-
-        // Go to that section
-        setTimeout(function settings_goToSection() {
-          Settings.currentPanel = section;
-        });
-        break;
-      default:
-        Settings._currentActivity = Settings._currentActivitySection = null;
-        break;
-    }
+    Settings._currentActivitySection = activityRequest.source.data.section;
 
     // Mark the desired panel as a dialog
-    if (Settings._currentActivity !== null) {
-      var domSection = document.getElementById(section);
-      domSection.dataset.dialog = true;
-      document.addEventListener('visibilitychange',
-        Settings.visibilityHandler);
-    }
+    var domSection = document.getElementById(Settings._currentActivitySection);
+    domSection.dataset.dialog = true;
+    document.addEventListener('visibilitychange',
+      Settings.visibilityHandler);
   },
 
   /**
