@@ -7,9 +7,9 @@ define(function(require) {
 
   var LazyLoader = require('shared/lazy_loader');
 
-  var Root = function() {};
+  var RootCore = function() {};
 
-  Root.prototype = {
+  RootCore.prototype = {
     init: function root_init() {
       // hide telephony panels
       if (!navigator.mozTelephony) {
@@ -45,7 +45,6 @@ define(function(require) {
           'js/firefox_accounts/menu_loader.js',
           'shared/js/airplane_mode_helper.js',
           'js/airplane_mode.js',
-          'js/battery.js',
           'shared/js/async_storage.js',
           'js/storage.js',
           'js/try_show_homescreen_section.js',
@@ -91,7 +90,7 @@ define(function(require) {
     }
   };
 
-  return function ctor_root() {
-    return new Root();
+  return function ctor_rootCore() {
+    return new RootCore();
   };
 });

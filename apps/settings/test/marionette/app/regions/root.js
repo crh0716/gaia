@@ -16,7 +16,7 @@ function RootPanel(client) {
 module.exports = RootPanel;
 
 RootPanel.Selectors = {
-  'batteryDesc': '#battery-desc',
+  'batteryDesc': '.battery-desc',
   'languageDesc': '#language-desc'
 };
 
