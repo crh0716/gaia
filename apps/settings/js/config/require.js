@@ -6,9 +6,6 @@ require.config({
     'shared': '../shared/js'
   },
   shim: {
-    'settings': {
-      exports: 'Settings'
-    },
     'shared/async_storage': {
       exports: 'AsyncStorage'
     },
@@ -24,8 +21,14 @@ require.config({
     'shared/screen_layout': {
       exports: 'ScreenLayout'
     },
+    'settings': {
+      exports: 'Settings'
+    },
     'shared/settings_listener': {
       exports: 'SettingsListener'
+    },
+    'utils': {
+      exports: ''
     }
   },
   modules: [

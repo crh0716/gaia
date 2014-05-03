@@ -4,10 +4,12 @@ define(function(require) {
   var SettingsPanel = require('modules/settings_panel');
   var Core = require('panels/root/core');
   var BatteryItem = require('panels/root/battery_item');
+  var LanguageItem = require('panels/root/language_item');
 
   return function ctor_root_panel() {
     var core = null;
     var batteryItem = null;
+    var languageItem = null;
 
     return SettingsPanel({
       onInit: function rp_onInit(rootElement) {
@@ -15,12 +17,16 @@ define(function(require) {
         core.init();
 
         batteryItem = BatteryItem(rootElement.querySelector('.battery-desc'));
+        languageItem =
+          LanguageItem(rootElement.querySelector('.language-desc'));
       },
       onBeforeShow: function rp_onBeforeShow() {
         batteryItem.enabled = true;
+        languageItem.enabled = true;
       },
       onHide: function rp_onBeforeHide() {
         batteryItem.enabled = false;
+        languageItem.enabled = false;
       }
     });
   };

@@ -17,7 +17,7 @@ module.exports = RootPanel;
 
 RootPanel.Selectors = {
   'batteryDesc': '.battery-desc',
-  'languageDesc': '#language-desc'
+  'languageDesc': '.language-desc'
 };
 
 RootPanel.prototype = {
