@@ -1,3 +1,4 @@
+/* exported ForwardLock */
 /*
  * This file defines a ForwardLock object with functions for locking and
  * unlocking content and for key management for the FirefoxOS implementation

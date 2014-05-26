@@ -4,6 +4,9 @@ define(function() {
   var _settings = {};
 
   var ctor = {
+    get cache() {
+      return _settings;
+    },
     getSettings: function(callback) {
       callback(_settings);
     },
