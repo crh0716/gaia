@@ -290,6 +290,7 @@ var Settings = {
           // If there isn't a section specified,
           // simply show ourselve without making ourselves a dialog.
           Settings._currentActivity = null;
+          return;
         }
 
         // Validate if the section exists
