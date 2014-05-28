@@ -7,17 +7,20 @@ var Settings = require('../app/app'),
 marionette('manipulate display settings', function() {
   var client = marionette.client();
   var settingsApp, systemApp;
-  var displayPanel;
 
   setup(function() {
     systemApp = new SystemApp(client);
     settingsApp = new Settings(client);
     settingsApp.launch();
-    // Navigate to the display menu
-    displayPanel = settingsApp.displayPanel;
   });
 
   suite('lock orientation', function() {
+    var displayPanel;
+    setup(function() {
+      // Navigate to the display menu
+      displayPanel = settingsApp.displayPanel;
+    });
+
     test('check default value', function() {
       assert.ok(
         !displayPanel.isLockOrientationChecked,
@@ -43,6 +46,11 @@ marionette('manipulate display settings', function() {
   });
 
   suite('change wallpaper', function() {
+    var displayPanel;
+    setup(function() {
+      // Navigate to the display menu
+      displayPanel = settingsApp.displayPanel;
+    });
     test('tap wallpaper', function() {
       displayPanel.tapWallpaper();
       assert.ok(
@@ -52,10 +60,9 @@ marionette('manipulate display settings', function() {
     });
   });
 
-  suite('adjust brightness automatically', function() {
-    var defaultAutoBrightnessEnabled;
-
-    test('show the toggle when with light sensor', function() {
+  suite('show the toggle when with light sensor', function() {
+    var displayPanel;
+    setup(function() {
       client.executeScript(function() {
         var theWindow = window.wrappedJSObject;
         theWindow.loadJSON = function(path, callback) {
@@ -63,12 +70,19 @@ marionette('manipulate display settings', function() {
             callback({ ambientLight: true });
           });
         };
-        theWindow.Display.init();
       });
-      assert.ok(displayPanel.isAutoBrightnessItemVisible);
+      // Navigate to the display menu
+      displayPanel = settingsApp.displayPanel;
     });
 
-    test('hide the toggle when without light sensor', function() {
+    test('toggle show be showed', function() {
+      assert.ok(displayPanel.isAutoBrightnessItemVisible);
+    });
+  });
+
+  suite('hide the toggle when without light sensor', function() {
+    var displayPanel;
+    setup(function() {
       client.executeScript(function() {
         var theWindow = window.wrappedJSObject;
         theWindow.loadJSON = function(path, callback) {
@@ -76,9 +90,22 @@ marionette('manipulate display settings', function() {
             callback({ ambientLight: false });
           });
         };
-        theWindow.Display.init();
       });
+      // Navigate to the display menu
+      displayPanel = settingsApp.displayPanel;
+    });
+
+    test('toggle show be hidden', function() {
       assert.ok(!displayPanel.isAutoBrightnessItemVisible);
+    });
+  });
+
+  suite('adjust brightness automatically', function() {
+    var displayPanel;
+    var defaultAutoBrightnessEnabled;
+    setup(function() {
+      // Navigate to the display menu
+      displayPanel = settingsApp.displayPanel;
     });
 
     test('check default value', function() {
@@ -110,9 +137,15 @@ marionette('manipulate display settings', function() {
         'manual brightness item visibility: ' + expectedVisibility
       );
     });
+
   });
 
   suite('screen timeout', function() {
+    var displayPanel;
+    setup(function() {
+      // Navigate to the display menu
+      displayPanel = settingsApp.displayPanel;
+    });
     // Skip the test as currently we are not able to tap on a select element.
     // Please refer to bug 977522 for details.
     test.skip('tap selector', function() {
