@@ -75,7 +75,10 @@ require.config({
     },
     {
       name: 'panels/display/panel',
-      exclude: ['main']
+      exclude: [
+        'main',
+        'modules/mvvm/observable'
+      ]
     },
     {
       name: 'panels/keyboard/panel',

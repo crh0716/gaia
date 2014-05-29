@@ -3,39 +3,27 @@ define(function(require) {
   'use strict';
 
   var SettingsListener = require('shared/settings_listener');
-  var SettingsCache = require('modules/settings_cache');
   var SettingsURL = require('shared/settings_url');
   var ForwardLock = require('shared/omadrm/fl');
-  var Wallpaper = function() {
-    this.elements = null;
-    this.wallpaperURL = new SettingsURL();
-  };
+  var Observable = require('modules/mvvm/observable');
 
-  Wallpaper.prototype = {
-    init: function w_init(elements) {
-      this.elements = elements;
+  // This is used to construct the observable object, in which we have one
+  // public property to be observed (wallpaperSrc) and one public
+  // function (selectWallpaper).
+  var wallpaperPrototype = {
+    _init: function w_init() {
+      this.wallpaperURL = new SettingsURL();
       this._watchWallpaperChange();
-      this.loadCurrentWallpaper();
     },
 
     _watchWallpaperChange: function w__watch_wallpaper_change() {
-      SettingsListener.observe('wallpaper.image', false,
+      SettingsListener.observe('wallpaper.image', '',
         function onHomescreenchange(value) {
-          this.elements.wallpaperPreview.src =
-            this.wallpaperURL.set(value);
+          this.wallpaperSrc = this.wallpaperURL.set(value);
       }.bind(this));
     },
 
-    loadCurrentWallpaper: function w_load_current_wallpaper() {
-      this.elements.wallpaperPreview.src =
-        this.wallpaperURL.set(SettingsCache.cache['wallpaper.image']);
-    },
-
-    onWallpaperClick: function w_on_wallpaper_click() {
-      ForwardLock.getKey(this._onWallpaperClick.bind(this));
-    },
-
-    _onWallpaperClick: function w__on_wallpaper_click(secret) {
+    _triggerActivity: function w__on_wallpaper_click(secret) {
       this.secret = secret;
       this.mozActivity = new MozActivity({
         name: 'pick',
@@ -74,9 +62,19 @@ define(function(require) {
 
     _onPickError: function w__on_pick_error() {
       console.warn('pick failed!');
-    }
+    },
+
+    wallpaperSrc: '',
+    selectWallpaper: function w_on_wallpaper_click() {
+      ForwardLock.getKey(this._triggerActivity.bind(this));
+    },
   };
+
   return function ctor_wallpaper() {
-    return new Wallpaper();
+    // Create the observable object using the prototype.
+    var wallpaper = Observable(wallpaperPrototype);
+    wallpaper._init();
+
+    return wallpaper;
   };
 });

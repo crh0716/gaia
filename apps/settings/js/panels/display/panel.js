@@ -20,12 +20,12 @@ define(function(require) {
       {
         elementName: 'wallpaperPreview',
         eventType: 'click',
-        methodName: 'onWallpaperClick'
+        methodName: 'selectWallpaper'
       },
       {
         elementName: 'wallpaperButton',
         eventType: 'click',
-        methodName: 'onWallpaperClick'
+        methodName: 'selectWallpaper'
       }
     ];
 
@@ -48,7 +48,6 @@ define(function(require) {
           wallpaperButton: panel.querySelector('.wallpaper-button')
         };
         display.init(displayElements);
-        wallpaper.init(wallpaperElements);
         bindEvents(wallpaperElements);
       },
 
@@ -59,6 +58,10 @@ define(function(require) {
             display.sensorStart(data);
           });
         }
+
+        wallpaper.observe('wallpaperSrc', function(newValue) {
+          wallpaperElements.wallpaperPreview.src = newValue;
+        });
       }
     });
   };
