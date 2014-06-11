@@ -88,8 +88,9 @@ Our `Makefile` has two tasks, one to **'build'** and one to **'clean'** (delete 
 
 
 ## Implementation Guide
-###How to create a new panel in Settings?
-1. Create an HTML template file with the following format and place it in the elements/ folder.
+### How to create a new panel in Settings?
+#### 1. Create an HTML template
+Create the template with the following format and place it under `elements/`.
 ```html
   <element name="{panel_name}" extends="section">
     <template>
@@ -98,101 +99,109 @@ Our `Makefile` has two tasks, one to **'build'** and one to **'clean'** (delete 
   </element>
 ```
 
-2. Add the following `link` tag in the head element of index.html.
+#### 2. Import the HTML template to index.html
+Add the following `link` tag to the head element of index.html.
 ```html
   <link rel="import" href="{path_to_html_template}">
 ```
 
-3. Add the following `section` tag in the body element of index.html.
+#### 3. Create the placeholder for populating the HTML template
+Add the following `section` tag in the body element of index.html. Typically `panel_id` and `panel_name` is identical.
 ```html
   <section is="{panel_name}" role="region" id="{panel_id}"></section>
 ```
 
 ### How to load scripts for a panel?
-1. Define an AMD module that extends from `SettingsPanel`. You can add other needed modules in the dependency list. A simple module looks like:
+#### 1. Define an AMD module that extends from `SettingsPanel`. You can require other needed modules. A simple module looks like:
 ```js
-  define('panels/SamplePanel', ['modules/SettingsPanel', 'modules/Module1', 'modules/Module2'],
-    function(SettingsPanel, Module1, Module2) {
-      return SettingsPanel({
-        onInit: function(rootElement, initOptions) {
-          //...
-        },
-        onUninit: function() {
-          //...
-        },
-        onShow: function(rootElement, showOptions) {
-          //...
-        },
-        onHide: function() {
-          //...
-        }
-      });
+  define(function(require) {
+    var SettingsPanel = require('modules/SettingsPanel');
+    var Module1 = require('modules/Module1');
+    var Module2 = require('modules/Module2');
+
+    return SettingsPanel({
+      onInit: function(rootElement, initOptions) {
+        // ...
+      },
+      onUninit: function() {
+        // ...
+      },
+      onShow: function(rootElement, showOptions) {
+        // ...
+      },
+      onHide: function() {
+        // ...
+      }
+    });
   });
 ```
 
-2. Add a <panel> tag with a "data-path" attrbute specifying the panel module in the end of the panel template. The HTML file looks like:
+#### 2. Add a <panel> tag with a "data-path" attrbute specifying the panel module in the end of the panel template. The HTML file looks like:
 ```html
   <element name="{panel_name}" extends="section">
     <template>
+
       <!-- UI elements -->
-      <panel data-path="panels/sample/panel"></panel>
+
+      <panel data-path="panels/{panel_name}/panel"></panel>
+
     </template>
   </element>
 ```
 
-All panels should be defined in `panels` folder with panel name as folder name. ex: battery panel should be defined in `panels/battery` folder.
+If the panel element with the `data-path` attribute is unavailable, `SettingsPanel` is used by default.
 
-###How to port old panel to new structure in Settings?
+All panels should be defined in the folder under `panels/` with the name identical to the panel's name. ex: battery panel should be defined in `panels/battery` folder.
 
-#### 1. Find panel href={element} in index.html
+###How to port an existing panel to follow the new architecture design?
 
-Remember the`element` name and find the correspondent panel element in element/{element}.html
+#### 1. Edit the HTML template
 
-#### 2. Edit {element}.html
-
+Find the HTML template corresponding to the panel under `elements/`.
 Replace the line in {element}.html from
 
 ```html
 <script src="js/<panel name>.js"></script>
 ```
-to
+  to
 ```html
 <panel data-path="panels/<panel name>/panel"></panel>
 ```
-We will use `help` panel to demostrate following steps.
-For help panel it denotes replace `js/support.js` to `js/panels/help/panel`.
 
-And make sure each html element id is start with panel-name prefix for better name spacing.
+Make sure each html element id is start with panel-name prefix for better name spacing.
+We will use `help` panel to demostrate following steps.
 
 #### 3. Create/replace modules
 
-Create `js/panels/<panel name>/support.js` to replace old `js/<name>.js`. For `help` panel, it denotes use `js/panels/help/support.js` to replace `js/support.js`. With following basis syntax:
+Create `js/panels/<panel name>/<name>.js` to replace old `js/<name>.js`. For `help` panel, it denotes use `js/panels/help/support.js` to replace `js/support.js`. With following basis syntax:
 
 ```js
-    define(function(require) {
-      'use strict';
-      var ModuleName = {
-        init: function support_init(elements) {
-          ModuleName.elements = elements;
-          ...
-        }
-      };
-      return function ctor_module_name() {
-        return new ModuleName();
-      };
-    });
+  define(function(require) {
+    'use strict';
+
+    var Support = {
+      init: function support_init() {
+        // do the initialization here
+      }
+    };
+
+    return function ctor_support() {
+      return new Support();
+    };
+  });
 ```
 
-If the old module called Settings.mozSettings, Use SettingsCache.getString() instead. Ex:
+If the old module called Settings.mozSettings, Use SettingsCache.getSettings() instead. Ex:
 
 ```js
   var SettingsCache = require('modules/settings_cache');
-  ...
-  SettingsCache.getSettings(function(result){
+
+  SettingsCache.getSettings(function(result) {
     var onlineSupportTitle = result['support.onlinesupport.title'];
-    ...
   });
 ```
+
+Note that the number of the modules supporting the panel is not limited to one. In many cases the original script might be large, we should examime the script carefully and convert them to smaller and reusable modules.
 
 #### 4. Create new panel
 
@@ -201,23 +210,21 @@ Create `panels/<panel name>/panel.js` and use following syntax:
 ```js
   define(function(require) {
     'use strict';
-    var SettingsPanel = require('modules/settings_panel'),
-        Support = require('panels/help/support');
+
+    var SettingsPanel = require('modules/settings_panel');
+    var Support = require('panels/help/support');
+
     return function ctor_support_panel() {
-      help
       return SettingsPanel({
-        onInit: function(panel, options) {
-          var elements = {
-            selector: panel.querySelector('#..')
-          };
-          ...
-          help.init(elements);
+        onInit: function(panelElement, options) {
+          Support.init();
         }
       });
     };
   });
 ```
-`panel.js` represent the place holder of each panel, inherit from `modules/settings_panel`. The detail implementation could be separate into several modules. In example is `panels/help/support`.
+
+`panel.js` represents the placeholder of each panel and usually inherits from `modules/settings_panel`. The detail implementation could be separate into several modules. In example is `panels/help/support`.
 
 Avoid naming the modules in source form, so no string ID as the first argument.
 
