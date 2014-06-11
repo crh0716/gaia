@@ -137,8 +137,8 @@ All dependent scripts should be loaded following the AMD pattern. Usually a pane
   });
 ```
 
-#### 2. Load the module in the HTML template
-A panel module could be loaded by adding a <panel> tag with a `data-path` attrbute specifying the panel module in the end of the template. Then the template will look like:
+#### 2. Add the module to the HTML template
+A panel module could be loaded by adding a <panel> tag with a `data-path` attrbute specifying the panel module in the end of the template. The template will look like:
 ```html
   <element name="{panel_name}" extends="section">
     <template>
@@ -155,57 +155,15 @@ Note that there should be only one panel module specified in the template. All o
 All panels should be defined in the folder under `panels/` with the name identical to the panel's name. ex: battery panel should be defined in `panels/battery` folder.
 
 ###How to port an existing panel to follow the new architecture design?
+Basically this could be done by combining the previous two sections. You create a panel module and require the dependent modules converted from the original scripts. Then add the panel module to the HTML template and remove all script tags.
 
-#### 1. Edit the HTML template
+#### 1. Create a new panel module
+Follow the previous section to create a new panel module and add it to the corresponding HTML template that could be found under `elements/`. The panel module must be placed under `panels/<panel_name>/` and named as `panel.js`. Remember to remove all script tags in the template because they should be required in the panel module.
 
-Find the HTML template corresponding to the panel under `elements/`.
-Replace the line in {element}.html from
+#### 2. Converting original scripts to AMD modules
+Examine all dependent scripts carefully and convert them to reusable modules. Reusable means that the modules should not be bound to fixed UI elements so that we have the flexibility doing the binding dynamically. It also implies that the unit tests no longer depend on UI elements, which makes writing tests more easily.
 
-```html
-<script src="js/<panel name>.js"></script>
-```
-  to
-```html
-<panel data-path="panels/<panel name>/panel"></panel>
-```
-
-Make sure each html element id is start with panel-name prefix for better name spacing.
-We will use `help` panel to demostrate following steps.
-
-#### 3. Create/replace modules
-
-Create `js/panels/<panel name>/<name>.js` to replace old `js/<name>.js`. For `help` panel, it denotes use `js/panels/help/support.js` to replace `js/support.js`. With following basis syntax:
-
-```js
-  define(function(require) {
-    'use strict';
-
-    var Support = {
-      init: function support_init() {
-        // do the initialization here
-      }
-    };
-
-    return function ctor_support() {
-      return new Support();
-    };
-  });
-```
-
-If the old module called Settings.mozSettings, Use SettingsCache.getSettings() instead. Ex:
-
-```js
-  var SettingsCache = require('modules/settings_cache');
-
-  SettingsCache.getSettings(function(result) {
-    var onlineSupportTitle = result['support.onlinesupport.title'];
-  });
-```
-
-Note that the number of the modules supporting the panel is not limited to one. In many cases the original script might be large, we should examime the script carefully and convert them to smaller and reusable modules.
-
-#### 4. Create new panel
-
+#### 3. Create the panel
 Create `panels/<panel name>/panel.js` and use following syntax:
 
 ```js
