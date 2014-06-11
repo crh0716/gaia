@@ -112,7 +112,8 @@ Add the following `section` tag in the body element of index.html. Typically `pa
 ```
 
 ### How to load scripts for a panel?
-#### 1. Define an AMD module that extends from `SettingsPanel`. You can require other needed modules. A simple module looks like:
+#### 1. Define an AMD module for the panel
+All dependent scripts should be loaded following the AMD pattern. Usually a panel module is extended from `SettingsPanel` to have the ability of automatic binding to the settings database. You can choose to extend from `Panel` if you would like to handing the binding by yourself or the panel does not need the database at all. Require other depedent modules in the modeul definition. A simple module looks like:
 ```js
   define(function(require) {
     var SettingsPanel = require('modules/SettingsPanel');
@@ -136,20 +137,20 @@ Add the following `section` tag in the body element of index.html. Typically `pa
   });
 ```
 
-#### 2. Add a <panel> tag with a "data-path" attrbute specifying the panel module in the end of the panel template. The HTML file looks like:
+#### 2. Load the module in the HTML template
+A panel module could be loaded by adding a <panel> tag with a `data-path` attrbute specifying the panel module in the end of the template. Then the template will look like:
 ```html
   <element name="{panel_name}" extends="section">
     <template>
 
       <!-- UI elements -->
 
-      <panel data-path="panels/{panel_name}/panel"></panel>
+      <panel data-path="{path_to_panel_module}"></panel>
 
     </template>
   </element>
 ```
-
-If the panel element with the `data-path` attribute is unavailable, `SettingsPanel` is used by default.
+Note that there should be only one panel module specified in the template. All other dependent modules should be required in the panel module. `SettingsPanel` is used by default if no panel module is specified.
 
 All panels should be defined in the folder under `panels/` with the name identical to the panel's name. ex: battery panel should be defined in `panels/battery` folder.
 
