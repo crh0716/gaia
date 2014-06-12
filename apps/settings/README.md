@@ -178,4 +178,5 @@ All dependent modules of the specified module except for the modules listed in t
 
 #### 5. Run integration tests
 Run the tests with the following command to ensure the refactoring does not break the anything.
+
     $ make test-integration APP=settings
