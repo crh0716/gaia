@@ -155,10 +155,10 @@ Note that there should be only one panel module specified in the template. All o
 All panels should be defined in the folder under `panels/` with the name identical to the panel's name. ex: battery panel should be defined in `panels/battery` folder.
 
 ###How to port an existing panel to follow the new architecture design?
-Basically this could be done by combining the previous two sections. You create a panel module and require the dependent modules converted from the original scripts. Then add the panel module to the HTML template and remove all script tags.
+Basically this could be done by following the previous two sections. Create a panel module and require the dependent modules converted from the original scripts. Then add the panel module to the HTML template and remove all script tags from it.
 
 #### 1. Create a new panel module
-Follow the previous section to create a new panel module and add it to the corresponding HTML template that could be found under `elements/`. The panel module must be placed under `panels/<panel_name>/` and named as `panel.js`. Remember to remove all script tags in the template because they should be required in the panel module.
+Follow this [section](#how-to-create-a-new-panel-in-settings) to create a new panel module and add it to the corresponding HTML template that could be found under `elements/`. The panel module must be placed under `panels/<panel_name>/` and named as `panel.js`. Remember to remove all script tags in the template because they should be required in the panel module.
 
 #### 2. Converting original scripts to AMD modules
 Examine all dependent scripts carefully and convert them to reusable modules. Reusable means that the modules should not be bound to fixed UI elements so that we have the flexibility doing the binding dynamically. It also implies that the unit tests no longer depend on UI elements, which makes writing tests more easily.
