@@ -46,24 +46,24 @@ A few fundamental modules are listed below:
 
 The internal functions, _onInit, _onBeforeShow, _onShow, _onBeforeHide, _onHide, and _onUninit, are called respectively in the basic functions. The syntax of the functions are:
 ```js
-  function _onInit(panelElement [, initOptions])
-  function _onBeforeShow(panelElement [, beforeShowOptions])
-  function _onShow(panelElement [, showOptions])
-  function _onBeforeHide()
-  function _onHide()
-  function _onUninit()
+function _onInit(panelElement [, initOptions])
+function _onBeforeShow(panelElement [, beforeShowOptions])
+function _onShow(panelElement [, showOptions])
+function _onBeforeHide()
+function _onHide()
+function _onUninit()
 ```
 
 We are able to override the internal functions by passing an option object into the constructor of `Panel`. For example,
 ```js
-  Panel({
-    onInit: function(panelElement, initOptions) { //... },
-    onBeforeShow: function(panelElement, beforeShowOptions) { //... },
-    onShow: function(panelElement, showOptions) { //... },
-    onBeforeHide: function() { //... },
-    onHide: function() { //... },
-    onUninit: function() { //... }
-  })
+Panel({
+  onInit: function(panelElement, initOptions) { //... },
+  onBeforeShow: function(panelElement, beforeShowOptions) { //... },
+  onShow: function(panelElement, showOptions) { //... },
+  onBeforeHide: function() { //... },
+  onHide: function() { //... },
+  onUninit: function() { //... }
+})
 ```
 
 Typically we can create DOM element references in onInit, update UI elements and add listeners in onShow or onBeforeShow, remove listeners in onHide, and do the cleanup in onUninit. The difference between onShow and onBeforeShow is that onBeforeShow is called before the transition, which makes updating the UI before displaying it to users possible. 
@@ -92,63 +92,63 @@ Our `Makefile` has two tasks, one to **'build'** and one to **'clean'** (delete 
 #### 1. Create an HTML template
 Create the template with the following format and place it under `elements/`.
 ```html
-  <element name="{panel_name}" extends="section">
-    <template>
-      <!-- UI elements -->
-    </template>
-  </element>
+<element name="{panel_name}" extends="section">
+  <template>
+    <!-- UI elements -->
+  </template>
+</element>
 ```
 
 #### 2. Import the HTML template to index.html
 Add the following `link` tag to the head element of index.html.
 ```html
-  <link rel="import" href="{path_to_html_template}">
+<link rel="import" href="{path_to_html_template}">
 ```
 
 #### 3. Create the placeholder for populating the HTML template
 Add the following `section` tag in the body element of index.html. Typically `panel_id` and `panel_name` is identical.
 ```html
-  <section is="{panel_name}" role="region" id="{panel_id}"></section>
+<section is="{panel_name}" role="region" id="{panel_id}"></section>
 ```
 
 ### How to load scripts for a panel?
 #### 1. Define an AMD module for the panel
 All dependent scripts should be loaded following the AMD pattern. Usually a panel module is extended from `SettingsPanel` to have the ability of automatic binding to the settings database. You can choose to extend from `Panel` if you would like to handing the binding by yourself or the panel does not need the database at all. Require other depedent modules in the modeul definition. A simple module looks like:
 ```js
-  define(function(require) {
-    var SettingsPanel = require('modules/SettingsPanel');
-    var Module1 = require('modules/Module1');
-    var Module2 = require('modules/Module2');
+define(function(require) {
+  var SettingsPanel = require('modules/SettingsPanel');
+  var Module1 = require('modules/Module1');
+  var Module2 = require('modules/Module2');
 
-    return SettingsPanel({
-      onInit: function(rootElement, initOptions) {
-        // ...
-      },
-      onUninit: function() {
-        // ...
-      },
-      onShow: function(rootElement, showOptions) {
-        // ...
-      },
-      onHide: function() {
-        // ...
-      }
-    });
+  return SettingsPanel({
+    onInit: function(rootElement, initOptions) {
+      // ...
+    },
+    onUninit: function() {
+      // ...
+    },
+    onShow: function(rootElement, showOptions) {
+      // ...
+    },
+    onHide: function() {
+      // ...
+    }
   });
+});
 ```
 
 #### 2. Add the module to the HTML template
 A panel module could be loaded by adding a <panel> tag with a `data-path` attrbute specifying the panel module in the end of the template. The template will look like:
 ```html
-  <element name="{panel_name}" extends="section">
-    <template>
+<element name="{panel_name}" extends="section">
+  <template>
 
-      <!-- UI elements -->
+    <!-- UI elements -->
 
-      <panel data-path="{path_to_panel_module}"></panel>
+    <panel data-path="{path_to_panel_module}"></panel>
 
-    </template>
-  </element>
+  </template>
+</element>
 ```
 Note that there should be only one panel module specified in the template. All other dependent modules should be required in the panel module. `SettingsPanel` is used by default if no panel module is specified.
 
@@ -169,10 +169,10 @@ The panel module created in the first step is the start point of each panel and 
 #### 4. Configure module settings
 Settings app utilizes r.js in the build process. It produces module scripts based on the configuration file, `settings/js/config/require.js`. The following object in the `modules` array in the configuration file specifies a module:   
 ```js
-  {
-    name: '{path_to_panel_module}',
-    exclude: ['main']
-  }
+{
+  name: '{path_to_panel_module}',
+  exclude: ['main']
+}
 ```
 All dependent modules of the specified module except for the modules listed in the exclude array will be merged into one file in the build process. This allows that all code required code could be loaded at once when a panel is navigated.
 
