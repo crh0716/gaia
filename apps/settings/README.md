@@ -111,6 +111,7 @@ Add the following `section` tag in the body element of index.html. Typically `pa
 <section is="{panel_name}" role="region" id="{panel_id}"></section>
 ```
 
+
 ### How to load scripts for a panel?
 #### 1. Define an AMD module for the panel
 All dependent scripts should be loaded following the AMD pattern. Usually a panel module is extended from `SettingsPanel` to have the ability of automatic binding to the settings database. You can choose to extend from `Panel` if you would like to handing the binding by yourself or the panel does not need the database at all. Require other depedent modules in the modeul definition. A simple module looks like:
@@ -151,8 +152,9 @@ Note that there should be only one panel module specified in the template. All o
 
 All panels should be defined in the folder under `panels/` with the name identical to the panel's name. ex: battery panel should be defined in `panels/battery` folder.
 
+
 ###How to port an existing panel to follow the new architecture design?
-Basically this could be done by following the previous two sections. Create a panel module and require the dependent modules converted from the original scripts. Then add the panel module to the HTML template and remove all script tags from it.
+Basically this could be done by following the previous two sections. Create a panel module and require the dependent modules converted from the original scripts, then add the panel module to the HTML template. Details are explained in the following.
 
 #### 1. Create a new panel module
 Follow this [section](#how-to-create-a-new-panel-in-settings) to create a new panel module and add it to the corresponding HTML template that could be found under `elements/`. The panel module must be placed under `panels/<panel_name>/` and named as `panel.js`. Remember to remove all script tags in the template because they should be required in the panel module.
