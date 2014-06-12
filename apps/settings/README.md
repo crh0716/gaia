@@ -10,11 +10,11 @@ We are in the middle of the refactoring that targets on the following problem.
 
 ### The Problem
 
-Currently basic settings services (mozSettings/UI bindings, panel navigation...) used across the app and root panel specific logic are defined together in a few modules (Settings, Connectivity). There are also cases that multiple panels are supported by a single script. These prevent settings app from being launched with only the necessary scripts and also imapct the perfrmance of loading panels.
+Currently basic settings services (mozSettings/UI bindings, panel navigation...) used across the app and root panel specific logic are defined together in a few modules (Settings, Connectivity). There are also cases that multiple panels are supported by a single script. These prevent settings app from being launched with only the required scripts and also imapct the perfrmance of loading panels.
 
 ### The Goal
 
-The goal is to ensure that each panel loads only the necessary scripts. This could be done by breaking existing modules into smaller and reusable ones. Meanwhile, large scripts should also be splited into modules. By doing this we could achieve:
+The goal is to ensure that each panel loads only the required scripts. This could be done by breaking existing modules into smaller and reusable ones. Meanwhile, large scripts should also be splited into modules. By doing this we could achieve:
 
 1. Module separation
 2. Panel separation
@@ -160,47 +160,22 @@ Basically this could be done by following the previous two sections. Create a pa
 #### 1. Create a new panel module
 Follow this [section](#how-to-create-a-new-panel-in-settings) to create a new panel module and add it to the corresponding HTML template that could be found under `elements/`. The panel module must be placed under `panels/<panel_name>/` and named as `panel.js`. Remember to remove all script tags in the template because they should be required in the panel module.
 
-#### 2. Converting original scripts to AMD modules
+#### 2. Convert original scripts to AMD modules
 Examine all dependent scripts carefully and convert them to reusable modules. Reusable means that the modules should not be bound to fixed UI elements so that we have the flexibility doing the binding dynamically. It also implies that the unit tests no longer depend on UI elements, which makes writing tests more easily.
 
-#### 3. Create the panel
-Create `panels/<panel name>/panel.js` and use following syntax:
+#### 3. Load the modules in the panel module
+The panel module created in the first step is the start point of each panel and it should be responsible for loading all dependent modules. Note that we should use [sugared syntax](http://requirejs.org/docs/whyamd.html#sugar) when loading the modules and avoid naming the module explicitly.
 
-```js
-  define(function(require) {
-    'use strict';
-
-    var SettingsPanel = require('modules/settings_panel');
-    var Support = require('panels/help/support');
-
-    return function ctor_support_panel() {
-      return SettingsPanel({
-        onInit: function(panelElement, options) {
-          Support.init();
-        }
-      });
-    };
-  });
-```
-
-`panel.js` represents the placeholder of each panel and usually inherits from `modules/settings_panel`. The detail implementation could be separate into several modules. In example is `panels/help/support`.
-
-Avoid naming the modules in source form, so no string ID as the first argument.
-
-Use the [sugared](http://requirejs.org/docs/whyamd.html#sugar) syntax instead of passing dependency arrays.
-
-####  5. Config `settings/js/config/require.js`, add correspondent configurations in `modules` section:
-
+#### 4. Configure module settings
+Settings app utilizes r.js in the build process. It produces module scripts based on the configuration file, `settings/js/config/require.js`. The following object in the `modules` array in the configuration file specifies a module:   
 ```js
   {
-    name: 'panels/help/panel',
+    name: '{path_to_panel_module}',
     exclude: ['main']
   }
 ```
+All dependent modules of the specified module except for the modules listed in the exclude array will be merged into one file in the build process. This allows that all code required code could be loaded at once when a panel is navigated.
 
-Thus in production mode, build script and r.js could pack panel related modules into single js for speed.
-
-#### 6. Test with command for integration test
-
+#### 5. Run integration tests
+Run the tests with the following command to ensure the refactoring does not break the anything.
     $ make test-integration APP=settings
-
