@@ -1,19 +1,15 @@
 # Settings
-
 Settings app is a single place that
 - Allows the user to configure device settings
 - Responds to **incoming activities** ('configure'), which allows the user to navigate to a specific panel to configure from another app (eg. show the wifi settings panel if no data connection is available).
 
 ## Current Status
-
 We are in the middle of the refactoring that targets on the following problem.
 
 ### The Problem
-
 Currently basic settings services (mozSettings/UI bindings, panel navigation...) used across the app and root panel specific logic are defined together in a few modules (Settings, Connectivity). There are also cases that multiple panels are supported by a single script. These prevent settings app from being launched with only the required scripts and also imapct the perfrmance of loading panels.
 
 ### The Goal
-
 The goal is to ensure that each panel loads only the required scripts. This could be done by breaking existing modules into smaller and reusable ones. Meanwhile, large scripts should also be splited into modules. By doing this we could achieve:
 
 1. Module separation
@@ -21,10 +17,9 @@ The goal is to ensure that each panel loads only the required scripts. This coul
 3. Inline activities
 4. View/logic separation
 
+
 ## Architecture
-
 ### Modules
-
 We are using [AMD](http://en.wikipedia.org/wiki/Asynchronous_module_definition) modules, loaded using 'Alemeda' (a lighter version of [RequireJS](http://requirejs.org)) and building/optimizing using ['r.js'](http://requirejs.org/docs/optimization.html) (the RequireJS optimizer). We have dependencies on files (`shared/js`)  which aren't AMD modules. For those we use the ['shim'](http://requirejs.org/docs/api.html#config-shim) options in our [`requirejs_config.js`](js/config/require.js)
 
 A few fundamental modules are listed below:
@@ -76,17 +71,6 @@ Note that the transition happens right after onBeforeShow, please avoid heavy th
 As we are using require.js for module management, scripts used in a panel should be wrapped in an AMD module or loaded from it, and which should extends from `SettingsPanel` to have basic settings services. Similar to `Panel`, we are able override onShow, onHide, onBeforeShow, onBeforeHide, onInit, and onUninit by passing an option object to the constructor of `SettingsPanel`.
 
 
-## Build Steps
-
-Settings app has it's own [`Makefile`](Makefile). A Makefile is similar to Grunt, but written in bash. It is essentially a list of tasks that can be run (via `make <task-name>`). When a Gaia application has its own `apps/<app-name>/Makefile`, it will be automatically run when Gaia builds.
-
-Our `Makefile` has two tasks, one to **'build'** and one to **'clean'** (delete the build). The build steps are as follows:
-
-1. Remove any previous settings build from the `build_stage/`
-2. Create an new directory `build_stage/settings`
-3. Run the `r.js` (RequireJS optimizer), pointing it at our `require_config.jslike` file (`.jslike` because we don't want Gaia builds to mess with it [I think]). This copies our entire application (JS and all) and bundles our JS (tracing `require()` calls) and CSS (tracing `@import`) in two single files.
-
-
 ## Implementation Guide
 ### How to create a new panel in Settings?
 #### 1. Create an HTML template
@@ -110,7 +94,6 @@ Add the following `section` tag in the body element of index.html. Typically `pa
 ```html
 <section is="{panel_name}" role="region" id="{panel_id}"></section>
 ```
-
 
 ### How to load scripts for a panel?
 #### 1. Define an AMD module for the panel
@@ -152,7 +135,6 @@ Note that there should be only one panel module specified in the template. All o
 
 All panels should be defined in the folder under `panels/` with the name identical to the panel's name. ex: battery panel should be defined in `panels/battery` folder.
 
-
 ###How to port an existing panel to follow the new architecture design?
 Basically this could be done by following the previous two sections. Create a panel module and require the dependent modules converted from the original scripts, then add the panel module to the HTML template. Details are explained in the following.
 
@@ -179,3 +161,12 @@ All dependent modules of the specified module except for the modules listed in t
 Run the tests with the following command to ensure the refactoring does not break the anything.
 
     $ make test-integration APP=settings
+
+## Build Steps
+Settings app has it's own [`Makefile`](Makefile). A Makefile is similar to Grunt, but written in bash. It is essentially a list of tasks that can be run (via `make <task-name>`). When a Gaia application has its own `apps/<app-name>/Makefile`, it will be automatically run when Gaia builds.
+
+Our `Makefile` has two tasks, one to **'build'** and one to **'clean'** (delete the build). The build steps are as follows:
+
+1. Remove any previous settings build from the `build_stage/`
+2. Create an new directory `build_stage/settings`
+3. Run the `r.js` (RequireJS optimizer), pointing it at our `require_config.jslike` file (`.jslike` because we don't want Gaia builds to mess with it [I think]). This copies our entire application (JS and all) and bundles our JS (tracing `require()` calls) and CSS (tracing `@import`) in two single files.
