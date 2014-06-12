@@ -142,11 +142,8 @@ A panel module could be loaded by adding a <panel> tag with a `data-path` attrbu
 ```html
 <element name="{panel_name}" extends="section">
   <template>
-
     <!-- UI elements -->
-
     <panel data-path="{path_to_panel_module}"></panel>
-
   </template>
 </element>
 ```
