@@ -158,13 +158,13 @@ Basically this could be done by following the previous two sections. Create a pa
 Follow this [section](#how-to-create-a-new-panel-in-settings) to create a new panel module and add it to the corresponding HTML template that could be found under `elements/`. The panel module must be placed under `panels/<panel_name>/` and named as `panel.js`. Remember to remove all script tags in the template because they should be required in the panel module.
 
 #### 2. Convert original scripts to AMD modules
->Examine all dependent scripts carefully and convert them to reusable modules. Reusable means that the modules should not be bound to fixed UI elements so that we have the flexibility doing the binding dynamically. It also implies that the unit tests no longer depend on UI elements, which makes writing tests more easily.
+Examine all dependent scripts carefully and convert them to reusable modules. Reusable means that the modules should not be bound to fixed UI elements so that we have the flexibility doing the binding dynamically. It also implies that the unit tests no longer depend on UI elements, which makes writing tests more easily.
 
 #### 3. Load the modules in the panel module
->The panel module created in the first step is the start point of each panel and it should be responsible for loading all dependent modules. Note that we should use [sugared syntax](http://requirejs.org/docs/whyamd.html#sugar) when loading the modules and avoid naming the module explicitly.
+The panel module created in the first step is the start point of each panel and it should be responsible for loading all dependent modules. Note that we should use [sugared syntax](http://requirejs.org/docs/whyamd.html#sugar) when loading the modules and avoid naming the module explicitly.
 
 #### 4. Configure module settings
->Settings app utilizes r.js in the build process. It produces module scripts based on the configuration file, `settings/js/config/require.js`. The following object in the `modules` array in the configuration file specifies a module:   
+Settings app utilizes r.js in the build process. It produces module scripts based on the configuration file, `settings/js/config/require.js`. The following object in the `modules` array in the configuration file specifies a module:   
 ```js
 {
   name: '{path_to_panel_module}',
@@ -174,6 +174,6 @@ Follow this [section](#how-to-create-a-new-panel-in-settings) to create a new pa
 All dependent modules of the specified module except for the modules listed in the exclude array will be merged into one file in the build process. This allows that all code required code could be loaded at once when a panel is navigated.
 
 #### 5. Run integration tests
->Run the tests with the following command to ensure the refactoring does not break the anything.
+Run the tests with the following command to ensure the refactoring does not break the anything.
 
     $ make test-integration APP=settings
