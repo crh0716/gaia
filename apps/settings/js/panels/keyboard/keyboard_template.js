@@ -6,6 +6,8 @@
 define(function(require) {
   'use strict';
 
+  var SettingsService = require('modules/settings_service');
+
   return function kp_keyboardTemplate(keyboard, recycled) {
     var container = null;
     var span;
@@ -20,7 +22,8 @@ define(function(require) {
     }
 
     container.onclick = function() {
-      keyboard.app.launch();
+      //keyboard.app.launch();
+      SettingsService.openFrame();
     };
     span.textContent = keyboard.name;
     return container;

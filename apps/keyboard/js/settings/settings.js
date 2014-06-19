@@ -13,13 +13,14 @@
 
   function goBack() {
     this.removeEventListener('click', goBack);
-    var activity = new MozActivity({
+    /*var activity = new MozActivity({
       name: 'configure',
       data: {
         target: 'device',
         section: 'keyboard'
       }
-    });
+    });*/
+    window.close();
   }
 
   // Until Haida lands this is how users could go back to Settings app

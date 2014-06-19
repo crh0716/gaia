@@ -201,6 +201,14 @@ define(function(require) {
             callback();
           }
         }).bind(this));
+      },
+
+      navigateBack: function () {
+
+      },
+
+      openFrame: function ss_openFrame() {
+        this.navigate('frame');
       }
     };
 });
