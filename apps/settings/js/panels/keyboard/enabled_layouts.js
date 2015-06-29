@@ -68,13 +68,10 @@ define(function(require) {
      *                      installed keyboards.
      */
     init: function kepl_onInit(elements) {
-      var that = this;
-      this._keyboardContext.init(function() {
-        that._keyboardContext.enabledLayouts(function(layouts) {
-          that._initEnabledLayoutListView(
-            elements.listViewRoot, layouts, that._layoutTemplate);
-          that.enabled = true;
-        });
+      this._keyboardContext.init(() => {
+        this._initEnabledLayoutListView(elements.listViewRoot,
+          this._keyboardContext.enabledLayouts, this._layoutTemplate);
+        this.enabled = true;
       });
     }
   };

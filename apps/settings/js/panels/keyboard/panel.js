@@ -2,7 +2,7 @@ define(function(require) {
   'use strict';
 
   var SettingsPanel = require('modules/settings_panel');
-  var KeyboardContext = require('modules/keyboard_context');
+  var KeyboardContext = require('modules/keyboard/keyboard_context');
   var keyboardTemplate = require('panels/keyboard/keyboard_template');
   var layoutTemplate = require('panels/keyboard/layout_template');
   var InstalledKeyboards = require('panels/keyboard/installed_keyboards');

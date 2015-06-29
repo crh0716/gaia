@@ -70,13 +70,10 @@ define(function(require) {
      *                      installed keyboards.
      */
     init: function k_init(elements) {
-      var that = this;
-      this._keyboardContext.init(function() {
-        that._keyboardContext.keyboards(function(keyboards) {
-          that._initAllKeyboardListView(
-            elements.listViewRoot, keyboards, that._keyboardTemplate);
-          that.enabled = true;
-        });
+      this._keyboardContext.init(() => {
+        this._initAllKeyboardListView(elements.listViewRoot,
+          this._keyboardContext.keyboards, this._keyboardTemplate);
+        this.enabled = true;
       });
     }
   };

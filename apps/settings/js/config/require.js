@@ -213,7 +213,7 @@ require.config({
         'modules/mvvm/list_view',
         'modules/mvvm/observable',
         'modules/mvvm/observable_array',
-        'modules/keyboard_context'
+        'modules/keyboard/keyboard_context'
       ]
     },
     {
@@ -223,7 +223,7 @@ require.config({
         'modules/mvvm/list_view',
         'modules/mvvm/observable',
         'modules/mvvm/observable_array',
-        'modules/keyboard_context',
+        'modules/keyboard/keyboard_context',
         'shared/keyboard_helper'
       ]
     },

@@ -105,13 +105,10 @@ define(function(require) {
      *                      installed keyboards.
      */
     init: function kal_onInit(elements) {
-      var that = this;
-      this._keyboardContext.init(function() {
-        that._keyboardContext.keyboards(function(keyboards) {
-          that._initInstalledLayoutListView(
-            elements.listViewRoot, keyboards, that._keyboardTemplate);
-          that.enabled = true;
-        });
+      this._keyboardContext.init(() => {
+        this._initInstalledLayoutListView(elements.listViewRoot,
+          this._keyboardContext.keyboards, this._keyboardTemplate);
+        this.enabled = true;
       });
 
       this._keyboardContext.defaultKeyboardEnabled(
