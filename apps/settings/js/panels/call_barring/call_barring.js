@@ -5,6 +5,7 @@
 define(function(require) {
   'use strict';
 
+  var Module = require('modules/base/module');
   var Observable = require('modules/mvvm/observable');
 
   var _cbAction = {
@@ -24,19 +25,70 @@ define(function(require) {
     'baicR': _cbAction.CALL_BARRING_BAICr
   };
 
+  /**
+   * @requires module:modules/mvvm/observable
+   * @returns {CallBarring}
+   */
+  var CallBarring = Module.create(function Wallpaper() {
+    this.super(Observable).call(this);
+
+    this._updating = false;
+  }).extend(Observable);
+
+  // settings
+  Observable.defineObservableProperty(CallBarring.prototype, 'baoc', {
+    readonly: true,
+    value: ''
+  });
+
+  Observable.defineObservableProperty(CallBarring.prototype, 'boic', {
+    readonly: true,
+    value: ''
+  });
+
+  Observable.defineObservableProperty(CallBarring.prototype, 'boicExhc', {
+    readonly: true,
+    value: ''
+  });
+
+  Observable.defineObservableProperty(CallBarring.prototype, 'baic', {
+    readonly: true,
+    value: ''
+  });
+
+  Observable.defineObservableProperty(CallBarring.prototype, 'baicR', {
+    readonly: true,
+    value: ''
+  });
+
+  // enabled state for the settings
+  Observable.defineObservableProperty(CallBarring.prototype, 'baoc_enabled', {
+    readonly: true,
+    value: ''
+  });
+
+  Observable.defineObservableProperty(CallBarring.prototype, 'boic_enabled', {
+    readonly: true,
+    value: ''
+  });
+
+  Observable.defineObservableProperty(CallBarring.prototype,
+    'boicExhc_enabled', {
+      readonly: true,
+      value: ''
+  });
+
+  Observable.defineObservableProperty(CallBarring.prototype, 'baic_enabled', {
+    readonly: true,
+    value: ''
+  });
+
+  Observable.defineObservableProperty(CallBarring.prototype, 'baicR_enabled', {
+    readonly: true,
+    value: ''
+  });
+
   var call_barring_prototype = {
-    // settings
-    baoc: '',
-    boic: '',
-    boicExhc: '',
-    baic: '',
-    baicR: '',
-    // enabled state for the settings
-    baoc_enabled: '',
-    boic_enabled: '',
-    boicExhc_enabled: '',
-    baic_enabled: '',
-    baicR_enabled: '',
 
     // updatingState
     updating: false,
@@ -47,19 +99,19 @@ define(function(require) {
       }.bind(this));
 
       // If barring All Outgoing is set, disable the rest of outgoing calls
-      if (!!this.baoc) {
-        this.boic_enabled = false;
-        this.boicExhc_enabled = false;
+      if (!!this._baoc) {
+        this._boic_enabled = false;
+        this._boicExhc_enabled = false;
       }
       // If barring All Incoming is active, disable the rest of incoming calls
-      if (!!this.baic) {
-        this.baicR_enabled = false;
+      if (!!this._baic) {
+        this._baicR_enabled = false;
       }
     },
 
     _disable: function(elementArray) {
       elementArray.forEach(function disable(element) {
-        this[element + '_enabled'] = false;
+        this['_' + element + '_enabled'] = false;
       }.bind(this));
     },
 
@@ -112,7 +164,7 @@ define(function(require) {
 
     set: function(api, setting, password) {
       // Check for updating in progress
-      if (!!this.updating) {
+      if (!!this._updating) {
         return;
       }
       // Check for API to be called
@@ -122,7 +174,7 @@ define(function(require) {
 
       var self = this;
       return new Promise(function (resolve, reject) {
-        self.updating = true;
+        self._updating = true;
         var allElements = [
           'baoc',
           'boic',
@@ -145,7 +197,7 @@ define(function(require) {
         }).catch(function errored(err) {
           error = err;
         }).then(function doAnyways() {
-          self.updating = false;
+          self._updating = false;
           self._enable(allElements);
           if (!error) {
             resolve();
@@ -158,7 +210,7 @@ define(function(require) {
 
     getAll: function(api) {
       // Check for updating in progress
-      if (!!this.updating) {
+      if (!!this._updating) {
         return;
       }
       // Check for API to be called
@@ -176,7 +228,7 @@ define(function(require) {
       ];
 
       var self = this;
-      self.updating = true;
+      self._updating = true;
 
       return new Promise(function (resolve, reject) {
         self._disable(allElements);
@@ -205,7 +257,7 @@ define(function(require) {
           console.error('Error receiving Call Barring status: ' +
             err.name + ' - ' + err.message);
         }).then(function afterEverythingDone() {
-          self.updating = false;
+          self._updating = false;
           self._enable(allElements);
           resolve();
         });
